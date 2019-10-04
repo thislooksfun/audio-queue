@@ -80,6 +80,11 @@ function _navigateTo(
         );
       });
     })
+    .then(() => console.log("Finished playing audio"))
+    .catch(e => {
+      console.log("Something went wrong!");
+      console.log(e);
+    })
     .return(driver);
 }
 

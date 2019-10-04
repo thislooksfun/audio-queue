@@ -5,5 +5,11 @@ set -e
 echo "Setting volume to 100%"
 amixer sset PCM,0 100% > /dev/null &
 
-echo "Starting NPM"
+echo "Selecting audio out device"
+amixer cset numid=3 1
+
+echo "Listing all audio devices"
+aplay -l
+
+echo "Starting node"
 xvfb-run npm start 80

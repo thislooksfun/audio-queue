@@ -26,6 +26,9 @@ RUN mv geckodriver /usr/lib/geckodriver
 RUN ln -sf /usr/lib/geckodriver /usr/bin/geckodriver
 RUN file /usr/bin/geckodriver
 
+# Configure DAC
+COPY ./conf/asound.conf /etc/asound.conf
+
 # Copies the package.json first for better cache on later pushes
 COPY package.json package.json
 COPY package-lock.json package-lock.json
@@ -66,7 +69,7 @@ ENV INITSYSTEM on
 # Set node env to production
 ENV NODE_ENV production
 
-RUN echo "v2"
+RUN echo "v3"
 
 # server.js will run when container starts up on the device
 CMD ["./scripts/start"]
