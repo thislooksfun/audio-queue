@@ -1,0 +1,72 @@
+# base-image for node on any machine using a template variable,
+# see more about dockerfile templates here: https://www.balena.io/docs/learn/develop/dockerfile/#dockerfile-templates
+# and about resin base images here: https://www.balena.io/docs/reference/base-images/base-images/
+# Note the node:slim image doesn't have node-gyp
+FROM resin/%%RESIN_MACHINE_NAME%%-node:10-stretch
+
+# Use Debian backports
+RUN echo "deb http://ftp.it.debian.org/debian unstable main contrib non-free" > /etc/apt/sources.list.d/backports.list
+
+# Install apt dependencies
+RUN apt update
+RUN apt -t unstable install -y firefox
+RUN apt install -y default-jre unzip xauth xvfb dbus dbus-x11 file tree
+# TODO: Figure out which of these are actually needed
+RUN apt install -y alsa-utils bluealsa bluez python-gobject python-dbus mplayer
+
+# Defines our working directory in container
+WORKDIR /usr/src/app
+
+# Install geckodriver
+RUN curl -sSLo geckodriver.tar.gz https://github.com/mozilla/geckodriver/releases/download/v0.23.0/geckodriver-v0.23.0-arm7hf.tar.gz
+RUN tar zxf geckodriver.tar.gz
+RUN rm geckodriver.tar.gz
+RUN mv geckodriver /usr/lib/geckodriver
+# Symlinks the firefox driver
+RUN ln -sf /usr/lib/geckodriver /usr/bin/geckodriver
+RUN file /usr/bin/geckodriver
+
+# Copies the package.json first for better cache on later pushes
+COPY package.json package.json
+COPY package-lock.json package-lock.json
+
+# Copies the scripts directory first for better cache on later pushes
+COPY ./scripts ./scripts
+
+# Copy the files required for compiling the source code
+COPY ./tsconfig.json ./tsconfig.json
+COPY ./src ./src
+
+# Install all dependencies (including dev, so that we can compile TypeScript).
+RUN JOBS=MAX npm install --unsafe-perm
+
+# Compile TypeScript
+RUN npm run tsc
+
+# Remove raw source files
+RUN rm -rf ./src
+
+# Remove node_modules
+RUN rm -rf ./node_modules
+
+# Install production dependencies, making sure to clean up the artifacts it
+# creates in order to reduce the image size.
+RUN JOBS=MAX npm install --production --unsafe-perm
+
+# Clean npm cache and /tmp to reduce final image size
+RUN JOBS=MAX npm cache clean --force
+RUN rm -rf /tmp/*
+
+# Create an empty folder to hold logs
+RUN mkdir ./logs
+
+# Enable systemd init system in container
+ENV INITSYSTEM on
+
+# Set node env to production
+ENV NODE_ENV production
+
+RUN echo "v2"
+
+# server.js will run when container starts up on the device
+CMD ["./scripts/start"]

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+echo "Setting volume to 100%"
+amixer sset PCM,0 100% > /dev/null &
+
+echo "Starting NPM"
+xvfb-run npm start 80
