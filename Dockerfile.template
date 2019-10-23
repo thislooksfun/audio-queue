@@ -26,8 +26,8 @@ RUN mv geckodriver /usr/lib/geckodriver
 RUN ln -sf /usr/lib/geckodriver /usr/bin/geckodriver
 RUN file /usr/bin/geckodriver
 
-# Configure DAC
-COPY ./conf/asound.conf /etc/asound.conf
+# Configure DAC (uncomment if you are using the hifiberry hat)
+# COPY ./conf/asound.conf /etc/asound.conf
 
 # Copies the package.json first for better cache on later pushes
 COPY package.json package.json
