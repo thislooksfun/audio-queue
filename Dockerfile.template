@@ -4,8 +4,8 @@
 # Note the node:slim image doesn't have node-gyp
 FROM resin/%%RESIN_MACHINE_NAME%%-node:10-stretch
 
-# Use Debian backports
-RUN echo "deb http://ftp.it.debian.org/debian unstable main contrib non-free" > /etc/apt/sources.list.d/backports.list
+# Use Debian unstable
+RUN echo "deb http://ftp.it.debian.org/debian unstable main contrib non-free" > /etc/apt/sources.list.d/unstable.list
 
 # Install apt dependencies
 RUN apt update
