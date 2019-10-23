@@ -2,8 +2,8 @@
 
 set -e
 
-echo "Setting volume to 100%"
-amixer sset PCM,0 100% > /dev/null &
+echo "Setting volume to 50%"
+amixer sset PCM,0 50% > /dev/null &
 
 echo "Selecting audio out device"
 amixer cset numid=3 1
