@@ -1,4 +1,5 @@
 import Promise from "bluebird";
+const log = require("tlf-log");
 
 export interface AudioTrack {
   source: string;
@@ -22,23 +23,55 @@ const queue: AudioSource[] = [];
 
 let nowPlaying: AudioSource | undefined;
 
+const autoplay = true;
+
 function start() {
-  if (nowPlaying == null) return;
-  nowPlaying.resume();
+  if (nowPlaying == null) {
+    log.info("Went to start source, but no source was found.");
+    return Promise.resolve();
+  }
+  log.info("Starting audio source...");
+  return nowPlaying
+    .resume()
+    .tap(() => log.info("Audio source started successfully"));
   // TODO: Preload next source?
 }
 
-function enqueue(as: AudioSource) {
+function enqueue(as: AudioSource): Promise<void> {
+  const { name, artist, source } = as.track;
+  log.info(`Queueing track ${name} by ${artist} from ${source}`);
   queue.push(as);
+  // If the queue was empty before, start it playing automatically.
+  return Promise.resolve().then(() => {
+    if (!autoplay) return;
+    if (queue.length > 1) return;
+    if (nowPlaying != undefined) return;
+    return next();
+  });
 }
 
 function next() {
-  if (nowPlaying) {
-    nowPlaying.stop();
-    history.push(nowPlaying);
+  log.info("Transitioning to the next track...");
+  return Promise.resolve()
+    .then(() => {
+      if (!nowPlaying) return;
+
+      log.trace("Audio currently playing, stopping that first...");
+      history.push(nowPlaying);
+      return nowPlaying.stop();
+    })
+    .then(() => (nowPlaying = queue.shift()))
+    .then(start);
+}
+
+function preloadNext() {
+  if (queue.length == 0) {
+    log.info("Went to preload next track, but the queue is empty.");
+    return Promise.resolve();
   }
-  nowPlaying = queue.shift();
-  start();
+
+  log.info("Preloading next track...");
+  return queue[0].preload().tap(() => log.info("Preload complete"));
 }
 
 function current() {
@@ -46,6 +79,7 @@ function current() {
 }
 
 function previous() {
+  log.info("Transitioning to the previous track...");
   if (nowPlaying) {
     nowPlaying.stop();
     queue.unshift(nowPlaying);
@@ -55,4 +89,4 @@ function previous() {
 }
 
 // TODO: Finalize API
-export default { enqueue, next, current, previous };
+export default { enqueue, next, preloadNext, current, previous };
