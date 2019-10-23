@@ -1,28 +1,64 @@
 // Built-in
 import path from "path";
-import { execSync } from "child_process";
 // 3rd-party
 import Promise from "bluebird";
-// import { until } from "selenium-webdriver";
 import { Options, ServiceBuilder, Driver } from "selenium-webdriver/firefox";
 // Logging
 const log = require("tlf-log");
-const player = require("play-sound")({});
 
 // TODO: Make this configurable?
 const maxAttempts = 1;
 
-const options = new Options().headless();
-// .addArguments("no-sandbox", "disable-dev-shm-usage");
+const devMode = process.env.NODE_ENV !== "production";
 
-const service = new ServiceBuilder()
-  // .loggingTo(path.join(__dirname, "../../logs/geckodriver.log"))
-  .enableVerboseLogging(true)
-  .build();
+if (devMode) {
+  // Add to the PATH
+  log.debug("Adding './bin' to path");
+  process.env.PATH += ":" + path.join(process.cwd(), "bin");
+}
 
-function _navigateTo(
-  driver: Driver,
+const updatePrefName = "media.gmp-manager.updateEnabled";
+let options = new Options().setPreference(updatePrefName, true);
+if (!devMode) {
+  options = options.headless();
+}
+
+export function createDriverSession() {
+  log.info("Creating driver session");
+  const service = new ServiceBuilder().enableVerboseLogging(true).build();
+  return Driver.createSession(options, service);
+}
+
+type redirectRule = boolean | string | string[] | RegExp | RegExp[];
+interface NavigationOptions {
+  driver?: Driver;
+  allowRedirect?: redirectRule;
+}
+
+function redirectAllowed(to: string, rule?: redirectRule): boolean {
+  if (rule == null) return false;
+  if (typeof rule == "boolean") return rule;
+  if (typeof rule == "string") return to == rule;
+  if (rule instanceof RegExp) return rule.test(to);
+
+  // If we get this far then rule is an array
+  const rules: string[] | RegExp[] = rule;
+  if (rules.length == 0) return false;
+
+  if (typeof rules[0] == "string") {
+    return (rules as string[])
+      .map(r => redirectAllowed(to, r))
+      .reduce((b, bb) => b || bb, false);
+  } else {
+    return (rules as RegExp[])
+      .map(r => redirectAllowed(to, r))
+      .reduce((b, bb) => b || bb, false);
+  }
+}
+
+export function navigateTo(
   url: string,
+  opts: NavigationOptions = {},
   attempt = 0
 ): Promise<Driver> {
   if (attempt >= maxAttempts) {
@@ -30,14 +66,17 @@ function _navigateTo(
     return Promise.reject("Navigation failed too many times, aborting");
   }
 
+  opts.driver = opts.driver || createDriverSession();
+
   log.info(`Fetching URL '${url}' (attempt ${attempt + 1}/${maxAttempts})`);
 
   let _errored = false;
+  const driver = opts.driver;
   return Promise.resolve()
     .then(() => driver.get(url))
     .then(() => driver.getCurrentUrl())
     .then(u => {
-      if (u !== url) {
+      if (u !== url && !redirectAllowed(u, opts.allowRedirect)) {
         // Wrong URL
         _errored = true;
         log.warn("URL mismatch");
@@ -52,46 +91,15 @@ function _navigateTo(
       _errored = true;
       log.error(`Something went wrong while trying to fetch '${url}'`);
       console.log(e);
-      console.log(
-        execSync(`ls ${path.join(__dirname, "../../")}`, { encoding: "utf8" })
-      );
-      log.info("Retrying...");
     })
     .then(() => {
       if (_errored) {
         log.debug("One or more errors occurred, retrying...");
         // If something went wrong, try again
-        return _navigateTo(driver, url, attempt + 1);
+        return navigateTo(url, opts, attempt + 1);
       }
       return;
     })
-    .then(() => driver.getTitle())
-    .then(console.log)
-    .then(() => driver.getCurrentUrl())
-    .then(console.log)
-    .then(() => {
-      return new Promise((resolve, reject) => {
-        player.play(
-          path.join(__dirname, "../../audio/audio.mp3"),
-          (err: any) => {
-            if (err) reject(err);
-            else resolve();
-          }
-        );
-      });
-    })
-    .then(() => console.log("Finished playing audio"))
-    .catch(e => {
-      console.log("Something went wrong!");
-      console.log(e);
-    })
     .return(driver);
-}
-
-export function navigateTo(url: string): Promise<Driver> {
-  log.info("Creating driver session");
-  const driver = Driver.createSession(options, service);
-  log.info("Created driver session");
-  return _navigateTo(driver, url);
 }
 export default navigateTo;
