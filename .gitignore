@@ -69,5 +69,8 @@ build/
 # GeckoDriver binary (platform specific)
 bin/geckodriver
 
+# Firefox symlink
+bin/firefox
+
 # Local support files
 bpl
