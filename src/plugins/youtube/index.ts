@@ -13,7 +13,7 @@ import Promise from "bluebird";
 import { AudioTrack, AudioSource } from "../../player/queue";
 import { Plugin } from "../plugin";
 // Logging
-const log = require("tlf-log");
+import log from "tlf-log";
 // Data
 const stateStr = fs.readFileSync(path.join(__dirname, "scripts/state.js"), {
   encoding: "utf8",

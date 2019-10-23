@@ -7,12 +7,12 @@ import { navigateTo, createDriverSession } from "../../util/webdriver";
 import { By, until } from "selenium-webdriver";
 import { Driver } from "selenium-webdriver/firefox";
 import untilNot from "../../util/until-not";
-const uuidv4 = require("uuid/v4");
+import uuidv4 from "uuid/v4";
 // Local
 // import repeat from "../../util/repeat";
 // import sleep from "../../util/sleep";
 // Logging
-const log = require("tlf-log");
+import log from "tlf-log";
 
 // const stateStr = fs.readFileSync(path.join(__dirname, "scripts/state.js"), {
 //   encoding: "utf8",

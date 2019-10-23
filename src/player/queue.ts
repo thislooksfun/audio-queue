@@ -1,5 +1,5 @@
 import Promise from "bluebird";
-const log = require("tlf-log");
+import log from "tlf-log";
 
 export interface AudioTrack {
   source: string;

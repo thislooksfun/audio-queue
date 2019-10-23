@@ -4,7 +4,7 @@ import path from "path";
 import Promise from "bluebird";
 import { Options, ServiceBuilder, Driver } from "selenium-webdriver/firefox";
 // Logging
-const log = require("tlf-log");
+import log from "tlf-log";
 
 // TODO: Make this configurable?
 const maxAttempts = 1;

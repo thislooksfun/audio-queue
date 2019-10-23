@@ -9,7 +9,7 @@ import youtube from "./plugins/youtube";
 import sleep from "./util/sleep";
 // import spotify from "./plugins/spotify";
 
-const log = require("tlf-log");
+import log from "tlf-log";
 
 log._setLevel("debug");
 
