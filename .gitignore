@@ -72,5 +72,8 @@ bin/geckodriver
 # Firefox symlink
 bin/firefox
 
+# The data directory
+data/
+
 # Local support files
 bpl
