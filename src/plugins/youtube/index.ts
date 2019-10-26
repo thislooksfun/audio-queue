@@ -145,6 +145,8 @@ function createAudioSource(track: YouTubeAudioTrack): YouTubeAudioSource {
 
 //#region Plugin
 const plugin: Plugin = {
+  name: "youtube",
+
   createAudioSource(track: AudioTrack): YouTubeAudioSource {
     if (isYTAudioTrack(track)) {
       return createAudioSource(track);
