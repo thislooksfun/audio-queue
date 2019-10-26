@@ -1,6 +1,11 @@
 "use strict";
 
+// Setup scripts
+import "./util/log-setup";
+import "./util/env";
+// 3rd party
 import Promise from "bluebird";
+// Local
 import server from "./web/server";
 
 import queue from "./player/queue";
@@ -8,15 +13,6 @@ import queue from "./player/queue";
 import youtube from "./plugins/youtube";
 import sleep from "./util/sleep";
 // import spotify from "./plugins/spotify";
-
-import log from "tlf-log";
-
-log._setLevel("debug");
-
-const devMode = process.env.NODE_ENV !== "production";
-if (devMode) {
-  require("dotenv").config();
-}
 
 const enqueueYT = (slug: string) =>
   Promise.resolve()
