@@ -1,0 +1,22 @@
+{{#section 'style'}}
+<style>
+  body {
+    background-color: #0ff;
+  }
+</style>
+{{/section}}
+
+<div class="queue">
+  <span>Queue:</span>
+
+  <ol>
+    {{#each queue}}
+    <li class="track">
+      {{!-- <img src="{{img}}" alt=""> --}}
+      <span class="title">{{title}}</span>
+      <span class="artist">{{artist}}</span>
+      <span class="source">{{source}}</span>
+    </li>
+    {{/each}}
+  </ol>
+</div>

@@ -6,39 +6,37 @@
 import { execSync } from "child_process";
 // 3rd-party
 import express from "express";
-import queue from "../player/queue";
-import Promise from "bluebird";
+import exphbs from "express-handlebars";
 // Local
-import { Plugin } from "../plugins/plugin";
-import youtube from "../plugins/youtube";
-import spotify from "../plugins/spotify";
+import queue from "../player/queue";
+import plugins from "../plugins";
 // Logging
 import log from "tlf-log";
 
 const app = express();
 const port = parseInt(process.argv[2]) || 8080;
 
-const plugins: Plugin[] = [youtube, spotify];
+function hbsSection(this: any, name: string, opts: any) {
+  this._sections = this._sections || {};
+  this._sections[name] = opts.fn(this);
+  return null;
+}
 
 export default {
   start: function() {
-    app.get("/", (_req, res) => res.send("Hello World!"));
+    // Register handlebars
+    const hbsOpts = { extname: ".hbs", helpers: { section: hbsSection } };
+    app.engine(".hbs", exphbs(hbsOpts));
+    app.set("view engine", ".hbs");
+
+    //#region Global routes
+    app.get("/", (_req, res) => {
+      res.render("home", { queue: queue.queue });
+    });
 
     app.get("/next", (_req, res) =>
       queue.next().then(() => res.send("success"))
     );
-
-    app.get("/enqueue/yt/:slug", (req, res) => {
-      Promise.resolve()
-        .then(() => youtube.searchFor(req.params.slug))
-        .then(([at]) => youtube.createAudioSource(at))
-        .tap(as => queue.enqueue(as))
-        .then(() => res.send("success"))
-        .catch((e: any) => {
-          res.status(500).send("Something went wrong!");
-          log.error(e);
-        });
-    });
 
     app.get("/volume/:percent", (req, res) => {
       const volume = parseFloat(req.params.percent);
@@ -49,13 +47,11 @@ export default {
         res.send(`Volume set to ${volume}%`);
       }
     });
+    //#endregion Global routes
 
     const apiv1Router = express.Router();
 
-    apiv1Router.get("/ping", (_req, res) => {
-      res.send("Pong!");
-    });
-
+    //#region Plugin routes
     plugins.forEach(plugin => {
       if (plugin.registerAPI != null) {
         log.trace(`Registering API routes for ${plugin.name}`);
@@ -71,8 +67,15 @@ export default {
         app.use("/" + plugin.name, pr);
       }
     });
+    //#endregion Plugin routes
+
+    //#region API v1 routes
+    apiv1Router.get("/ping", (_req, res) => {
+      res.send("Pong!");
+    });
 
     app.use("/api/v1", apiv1Router);
+    //#endregion API v1 routes
 
     app.listen(port, () => log.info(`App listening on port ${port}!`));
   },
