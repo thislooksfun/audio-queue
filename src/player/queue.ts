@@ -89,4 +89,18 @@ function previous() {
 }
 
 // TODO: Finalize API
-export default { enqueue, next, preloadNext, current, previous };
+export default {
+  enqueue,
+  next,
+  preloadNext,
+  current,
+  previous,
+
+  // Wrappers for displaying queue and history
+  get queue() {
+    return queue.map(s => s.track);
+  },
+  get history() {
+    return history.map(s => s.track);
+  },
+};
