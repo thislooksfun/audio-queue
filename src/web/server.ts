@@ -9,12 +9,16 @@ import express from "express";
 import queue from "../player/queue";
 import Promise from "bluebird";
 // Local
+import { Plugin } from "../plugins/plugin";
 import youtube from "../plugins/youtube";
+import spotify from "../plugins/spotify";
 // Logging
 import log from "tlf-log";
 
 const app = express();
 const port = parseInt(process.argv[2]) || 8080;
+
+const plugins: Plugin[] = [youtube, spotify];
 
 export default {
   start: function() {
@@ -46,12 +50,30 @@ export default {
       }
     });
 
-    app.get("/api/v1/ping", (_req, res) => {
+    const apiv1Router = express.Router();
+
+    apiv1Router.get("/ping", (_req, res) => {
       res.send("Pong!");
     });
 
-    app.listen(port, () =>
-      console.log(`Example app listening on port ${port}!`)
-    );
+    plugins.forEach(plugin => {
+      if (plugin.registerAPI != null) {
+        log.trace(`Registering API routes for ${plugin.name}`);
+        const pr = express.Router();
+        plugin.registerAPI(pr);
+        apiv1Router.use("/" + plugin.name, pr);
+      }
+
+      if (plugin.registerPages != null) {
+        log.trace(`Registering page routes for ${plugin.name}`);
+        const pr = express.Router();
+        plugin.registerPages(pr);
+        app.use("/" + plugin.name, pr);
+      }
+    });
+
+    app.use("/api/v1", apiv1Router);
+
+    app.listen(port, () => log.info(`App listening on port ${port}!`));
   },
 };
