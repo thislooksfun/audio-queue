@@ -34,8 +34,8 @@ function createAudioSource(track: SpotifyAudioTrack): SpotifyAudioSource {
       return Promise.reject("Not implemented");
     },
     preload() {
-      // TODO
-      return Promise.resolve();
+      log.fatal("Not implemented");
+      return Promise.reject("Not implemented");
     },
     status() {
       log.fatal("Not implemented");
@@ -46,12 +46,12 @@ function createAudioSource(track: SpotifyAudioTrack): SpotifyAudioSource {
       return Promise.reject("Not implemented");
     },
     resume() {
-      // TODO
-      return Promise.resolve();
+      log.fatal("Not implemented");
+      return Promise.reject("Not implemented");
     },
     stop() {
-      // TODO
-      return Promise.resolve();
+      log.fatal("Not implemented");
+      return Promise.reject("Not implemented");
     },
   };
 }
