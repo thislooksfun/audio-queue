@@ -114,21 +114,20 @@ export default {
       );
     });
 
-    // TODO: Implement
-    // apiv1Router.put("/queue/playpause", (_req, res) => {
-    //   return (
-    //     Promise.resolve()
-    //       .then(() => queue.playpause())
-    //       // Send them back to the home page on success
-    //       .then(() => res.redirect("/"))
-    //       // Show an error on error
-    //       .catch(e => {
-    //         log.error(`Something went wrong when enqueuing ${req.body.slug}`);
-    //         console.log(e);
-    //         res.status(500).send("Something went wrong");
-    //       })
-    //   );
-    // });
+    apiv1Router.put("/queue/playpause", (_req, res) => {
+      return (
+        Promise.resolve()
+          .then(() => queue.playpause())
+          // Send them back to the home page on success
+          .then(() => res.redirect("/"))
+          // Show an error on error
+          .catch(e => {
+            log.error("Something went wrong when playing/pausing");
+            console.log(e);
+            res.status(500).send("Something went wrong");
+          })
+      );
+    });
 
     apiv1Router.put("/queue/previous", (_req, res) => {
       return (
