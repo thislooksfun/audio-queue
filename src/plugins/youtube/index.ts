@@ -104,6 +104,16 @@ function createAudioSource(track: YouTubeAudioTrack): YouTubeAudioSource {
         .then(d => (track.data.driver = d))
         .return();
     },
+    status: () => {
+      return Promise.resolve()
+        .then(() => updateState(track.data))
+        .then(() => <State>track.data.state)
+        .then(state => ({
+          playing: !state.paused,
+          time: state.time || -1,
+          duration: state.duration || -1,
+        }));
+    },
     pause() {
       log.fatal("Not implemented");
       return Promise.reject("Not implemented");

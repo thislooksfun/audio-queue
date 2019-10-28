@@ -37,6 +37,10 @@ function createAudioSource(track: SpotifyAudioTrack): SpotifyAudioSource {
       // TODO
       return Promise.resolve();
     },
+    status() {
+      log.fatal("Not implemented");
+      return Promise.reject("Not implemented");
+    },
     pause() {
       log.fatal("Not implemented");
       return Promise.reject("Not implemented");

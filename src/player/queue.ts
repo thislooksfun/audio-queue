@@ -1,6 +1,12 @@
 import Promise from "bluebird";
 import log from "tlf-log";
 
+export interface AudioStatus {
+  playing: boolean;
+  time: number;
+  duration: number;
+}
+
 export interface AudioTrack {
   source: string;
   name: string;
@@ -13,6 +19,7 @@ export interface AudioSource {
 
   loaded: () => Promise<boolean>;
   preload: () => Promise<void>;
+  status: () => Promise<AudioStatus>;
   pause: () => Promise<void>;
   resume: () => Promise<void>;
   stop: () => Promise<void>;
