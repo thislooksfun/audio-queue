@@ -1,5 +1,8 @@
+// 3rd party
 import Promise from "bluebird";
 import log from "tlf-log";
+// Local
+import swap from "../util/swap";
 
 export interface AudioStatus {
   playing: boolean;
@@ -95,10 +98,15 @@ function previous() {
     .then(start);
 }
 
-function swap<T>(arr: T[], i1: number, i2: number) {
-  const tmp = arr[i1];
-  arr[i1] = arr[i2];
-  arr[i2] = tmp;
+function playpause() {
+  if (nowPlaying == null) {
+    return Promise.resolve();
+  }
+
+  const np: AudioSource = nowPlaying;
+  return Promise.resolve()
+    .then(() => np.status())
+    .then(({ playing }) => (playing ? np.pause() : np.resume()));
 }
 
 function shiftUp(index: number) {
@@ -121,6 +129,8 @@ export default {
   next,
   preloadNext,
   previous,
+
+  playpause,
 
   shiftUp,
   shiftDown,
