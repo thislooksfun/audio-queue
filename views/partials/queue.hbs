@@ -1,10 +1,16 @@
-{{#section 'style'}}
 <style>
-  body {
-    background-color: #0ff;
+  .queue {
+    background-color: #aaa;
+  }
+
+  .queue .track {
+    background-color: yellowgreen;
+  }
+
+  .queue .track form {
+    display: inline-block;
   }
 </style>
-{{/section}}
 
 <div class="queue">
   <span>Queue:</span>
@@ -13,10 +19,29 @@
     {{#each queue}}
     <li class="track">
       {{!-- <img src="{{img}}" alt=""> --}}
-      <span class="title">{{title}}</span>
+      <span class="title">{{name}}</span>
       <span class="artist">{{artist}}</span>
       <span class="source">{{source}}</span>
+
+      <form action="/api/v1/queue/shift" method="POST" class="shift-up">
+        <input type="hidden" name="_method" value="put">
+        <input type="hidden" name="direction" value="up">
+        <input type="hidden" name="index" value="{{@index}}">
+        <button type="submit" {{#if @first}}disabled{{/if}}>↑</button>
+      </form>
+      <form action="/api/v1/queue/shift" method="POST" class="shift-down">
+        <input type="hidden" name="_method" value="put">
+        <input type="hidden" name="direction" value="down">
+        <input type="hidden" name="index" value="{{@index}}">
+        <button type="submit" {{#if @last}}disabled{{/if}}>↓</button>
+      </form>
     </li>
     {{/each}}
   </ol>
+
+  <form action="/api/v1/enqueue" method="POST">
+    <input type="hidden" name="service" value="youtube">
+    <input type="text" name="slug" placeholder="YouTube video id">
+    <button type="submit">Add to Queue</button>
+  </form>
 </div>

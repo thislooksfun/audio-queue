@@ -117,9 +117,10 @@ function createAudioSource(track: YouTubeAudioTrack): YouTubeAudioSource {
         .return();
     },
     stop() {
-      return Promise.resolve(track.data.driver).then(d =>
-        d != null ? d.close() : undefined
-      );
+      return Promise.resolve(track.data.driver)
+        .then(d => (d ? d.close() : undefined))
+        .then(() => delete track.data.driver)
+        .return();
     },
   };
 
@@ -159,7 +160,7 @@ const plugin: Plugin = {
     return [
       {
         source: "youtube",
-        name: "hello",
+        name: `hello -- ${query}`,
         artist: "world",
         data: { slug: query },
       },

@@ -74,18 +74,38 @@ function preloadNext() {
   return queue[0].preload().tap(() => log.info("Preload complete"));
 }
 
-function current() {
-  return nowPlaying;
-}
-
 function previous() {
   log.info("Transitioning to the previous track...");
-  if (nowPlaying) {
-    nowPlaying.stop();
-    queue.unshift(nowPlaying);
+  return Promise.resolve()
+    .then(() => {
+      if (!nowPlaying) return;
+
+      log.trace("Audio currently playing, stopping that first...");
+      queue.unshift(nowPlaying);
+      return nowPlaying.stop();
+    })
+    .then(() => (nowPlaying = history.pop()))
+    .then(start);
+}
+
+function swap<T>(arr: T[], i1: number, i2: number) {
+  const tmp = arr[i1];
+  arr[i1] = arr[i2];
+  arr[i2] = tmp;
+}
+
+function shiftUp(index: number) {
+  if (index <= 0 || index >= queue.length) {
+    throw new Error("Out of bounds!");
   }
-  nowPlaying = history.pop();
-  start();
+  swap(queue, index, index - 1);
+}
+
+function shiftDown(index: number) {
+  if (index < 0 || index >= queue.length - 1) {
+    throw new Error("Out of bounds!");
+  }
+  swap(queue, index, index + 1);
 }
 
 // TODO: Finalize API
@@ -93,10 +113,15 @@ export default {
   enqueue,
   next,
   preloadNext,
-  current,
   previous,
 
+  shiftUp,
+  shiftDown,
+
   // Wrappers for displaying queue and history
+  get current() {
+    return nowPlaying ? nowPlaying.track : undefined;
+  },
   get queue() {
     return queue.map(s => s.track);
   },

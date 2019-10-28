@@ -1,0 +1,38 @@
+<style>
+  .now-playing {
+    background-color: #aaa;
+    margin: 1rem 0;
+  }
+
+  .now-playing .controls form {
+    display: inline-block;
+  }
+</style>
+
+<div class="now-playing">
+
+  {{!-- <img src="{{img}}" alt=""> --}}
+  {{#if current}}
+  <span>Now Playing:</span>
+  <span class="title">{{current.name}}</span>
+  <span class="artist">{{current.artist}}</span>
+  <span class="source">{{current.source}}</span>
+  {{else}}
+  <span>Nothing Playing</span>
+  {{/if}}
+
+  <div class="controls">
+    <form action="/api/v1/queue/previous" method="POST">
+      <input type="hidden" name="_method" value="put">
+      <button type="submit">Previous</button>
+    </form>
+    <form action="/api/v1/queue/playpause" method="POST">
+      <input type="hidden" name="_method" value="put">
+      <button type="submit">Play/Pause</button>
+    </form>
+    <form action="/api/v1/queue/next" method="POST">
+      <input type="hidden" name="_method" value="put">
+      <button type="submit">Next</button>
+    </form>
+  </div>
+</div>
