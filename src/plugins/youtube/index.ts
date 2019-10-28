@@ -15,12 +15,17 @@ import { Plugin } from "../plugin";
 // Logging
 import log from "tlf-log";
 // Data
-const stateStr = fs.readFileSync(path.join(__dirname, "scripts/state.js"), {
-  encoding: "utf8",
-});
+const encoding = { encoding: "utf8" };
+const scriptsDir = path.join(__dirname, "scripts");
+const infoStr = fs.readFileSync(path.join(scriptsDir, "info.js"), encoding);
+const stateStr = fs.readFileSync(path.join(scriptsDir, "state.js"), encoding);
 //#endregion Imports
 
 //#region Interfaces
+interface Info {
+  name: string;
+  artist: string;
+}
 interface State {
   paused: boolean | null;
   time: number | null;
@@ -50,6 +55,18 @@ function isYTAudioTrack(at: AudioTrack): at is YouTubeAudioTrack {
 //#endregion Type guards
 
 //#region Helper functions
+function updateInfo(t: YouTubeAudioTrack): Promise<YouTubeAudioTrack> {
+  if (t.data.driver == null) {
+    return Promise.reject("Invalid video -- driver has not been started.");
+  }
+  const driver: Driver = t.data.driver;
+  return getInfo(driver)
+    .then(i => {
+      t.name = i.name;
+      t.artist = i.artist;
+    })
+    .return(t);
+}
 function updateState(v: YTVideo): Promise<YTVideo> {
   if (v.driver == null) {
     return Promise.reject("Invalid video -- driver has not been started.");
@@ -58,6 +75,10 @@ function updateState(v: YTVideo): Promise<YTVideo> {
   return getState(driver)
     .then(s => (v.state = s))
     .return(v);
+}
+
+function getInfo(driver: Driver): Promise<Info> {
+  return Promise.resolve().then(() => driver.executeScript(infoStr));
 }
 
 function getState(driver: Driver): Promise<State> {
@@ -78,10 +99,11 @@ function getState(driver: Driver): Promise<State> {
 //   return paused(driver).then(p => !p);
 // }
 
-function play(driver: Driver): Promise<void> {
+function playpause(driver: Driver): Promise<void> {
   return Promise.resolve()
-    .then(() => driver.findElements(By.css(".ytp-cued-thumbnail-overlay")))
-    .each(el => driver.wait(until.elementIsVisible(el)).then(() => el.click()))
+    .then(() => driver.findElement(By.id("movie_player")))
+    .tap(el => driver.wait(until.elementIsVisible(el)))
+    .then(el => el.click())
     .return();
 }
 
@@ -115,16 +137,40 @@ function createAudioSource(track: YouTubeAudioTrack): YouTubeAudioSource {
         }));
     },
     pause() {
-      log.fatal("Not implemented");
-      return Promise.reject("Not implemented");
+      return (
+        Promise.resolve()
+          .then(() => (track.data.driver == null ? this.preload() : null))
+          .then(() => this.status())
+          .then(({ playing }) => {
+            if (!playing) throw new Error("Already paused");
+          })
+          .then(() => track.data.driver as Driver)
+          .then(d => playpause(d))
+          // No-op on "Already paused" error
+          .catch({ message: "Already paused" }, () => {})
+          // Update the info and state in parallel
+          .then(() => [updateInfo(track), updateState(track.data)])
+          .all()
+          .return()
+      );
     },
     resume() {
-      return Promise.resolve()
-        .then(() => (track.data.driver == null ? this.preload() : null))
-        .then(() => track.data.driver as Driver)
-        .then(d => play(d))
-        .then(() => updateState(track.data))
-        .return();
+      return (
+        Promise.resolve()
+          .then(() => (track.data.driver == null ? this.preload() : null))
+          .then(() => this.status())
+          .then(({ playing }) => {
+            if (playing) throw new Error("Already playing");
+          })
+          .then(() => track.data.driver as Driver)
+          .then(d => playpause(d))
+          // No-op on "Already playing" error
+          .catch({ message: "Already playing" }, () => {})
+          // Update the info and state in parallel
+          .then(() => [updateInfo(track), updateState(track.data)])
+          .all()
+          .return()
+      );
     },
     stop() {
       return Promise.resolve(track.data.driver)
