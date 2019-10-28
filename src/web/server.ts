@@ -41,8 +41,9 @@ export default {
     app.engine(".hbs", exphbs(hbsOpts));
     app.set("view engine", ".hbs");
 
-    // Parse both application/x-www-form-urlencoded and application/json bodies
+    // Parse application/x-www-form-urlencoded
     app.use(bodyParser.urlencoded({ extended: false }));
+    // Parse application/json bodies
     app.use(bodyParser.json());
 
     // Allow forms to override method
