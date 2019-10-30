@@ -34,6 +34,26 @@ function methodOverrideBody(req: Request, _res: Response) {
   }
 }
 
+type Promiseable<T> = T | Promise<T>;
+function apiWrap<T>(
+  res: Response,
+  action: string,
+  p: () => Promiseable<T>
+): Promise<void> {
+  return (
+    Promise.resolve()
+      .then(p)
+      // Send them back to the home page on success
+      .then(() => res.redirect("/"))
+      // Show an error on error
+      .catch(e => {
+        log.error(`Something went wrong when ${action}`);
+        console.log(e);
+        res.status(500).send("Something went wrong");
+      })
+  );
+}
+
 export default {
   start: function() {
     // Register handlebars
@@ -100,47 +120,19 @@ export default {
     });
 
     apiv1Router.put("/queue/next", (_req, res) => {
-      return (
-        Promise.resolve()
-          .then(() => queue.next())
-          // Send them back to the home page on success
-          .then(() => res.redirect("/"))
-          // Show an error on error
-          .catch(e => {
-            log.error(`Something went wrong when moving to the next track`);
-            console.log(e);
-            res.status(500).send("Something went wrong");
-          })
-      );
+      log.trace("Moving to next track");
+      return apiWrap(res, "moving to the next track", () => queue.next());
     });
 
     apiv1Router.put("/queue/playpause", (_req, res) => {
-      return (
-        Promise.resolve()
-          .then(() => queue.playpause())
-          // Send them back to the home page on success
-          .then(() => res.redirect("/"))
-          // Show an error on error
-          .catch(e => {
-            log.error("Something went wrong when playing/pausing");
-            console.log(e);
-            res.status(500).send("Something went wrong");
-          })
-      );
+      log.trace("Play / pause");
+      return apiWrap(res, "playing/pausing", () => queue.playpause());
     });
 
     apiv1Router.put("/queue/previous", (_req, res) => {
-      return (
-        Promise.resolve()
-          .then(() => queue.previous())
-          // Send them back to the home page on success
-          .then(() => res.redirect("/"))
-          // Show an error on error
-          .catch(e => {
-            log.error(`Something went wrong when moving to the previous track`);
-            console.log(e);
-            res.status(500).send("Something went wrong");
-          })
+      log.trace("Moving to previous track");
+      return apiWrap(res, "moving to the previous track", () =>
+        queue.previous()
       );
     });
 
@@ -153,22 +145,10 @@ export default {
 
       const up = queue.shiftUp.bind(queue);
       const down = queue.shiftDown.bind(queue);
+      const shift = req.body.direction == "up" ? up : down;
 
-      return (
-        Promise.resolve()
-          .then(() => (req.body.direction == "up" ? up : down))
-          .then(shift => shift(parseInt(req.body.index)))
-          // Send them back to the home page on success
-          .then(() => res.redirect("/"))
-          // Show an error on error
-          .catch(e => {
-            log.error(
-              `Something went wrong when shifting ${req.body.index} ${req.body.direction}`
-            );
-            console.log(e);
-            res.status(500).send("Something went wrong");
-          })
-      );
+      const action = `shifting ${req.body.index} ${req.body.direction}`;
+      return apiWrap(res, action, () => shift(parseInt(req.body.index)));
     });
 
     apiv1Router.post("/enqueue", (req, res) => {
@@ -183,21 +163,13 @@ export default {
 
       log.trace(`Enqueuing YT video ${req.body.slug}`);
 
-      return (
-        Promise.resolve()
+      return apiWrap(res, `enqueuing ${req.body.slug}`, () => {
+        return Promise.resolve()
           .then(() => youtube.searchFor(req.body.slug))
           .then(arr => arr[0])
           .then(at => youtube.createAudioSource(at))
-          .then(as => queue.enqueue(as))
-          // Send them back to the home page on success
-          .then(() => res.redirect("/"))
-          // Show an error on error
-          .catch(e => {
-            log.error(`Something went wrong when enqueuing ${req.body.slug}`);
-            console.log(e);
-            res.status(500).send("Something went wrong");
-          })
-      );
+          .then(as => queue.enqueue(as));
+      });
     });
 
     app.use("/api/v1", apiv1Router);
