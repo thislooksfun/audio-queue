@@ -9,12 +9,12 @@ import express, { Request, Response } from "express";
 import exphbs from "express-handlebars";
 import bodyParser from "body-parser";
 import methodOverride from "method-override";
+import log from "tlf-log";
 // Local
 import queue from "../player/queue";
 import plugins from "../plugins";
 import youtube from "../plugins/youtube";
-// Logging
-import log from "tlf-log";
+import connect from "../plugins/spotify/connect";
 
 const app = express();
 const port = parseInt(process.argv[2]) || 8080;
@@ -72,11 +72,18 @@ export default {
 
     //#region Global routes
     app.get("/", (_req, res) => {
-      res.render("home", {
-        queue: queue.queue,
-        history: queue.history,
-        current: queue.current,
-      });
+      return Promise.resolve()
+        .then(() => connect.isAuthenticated())
+        .then(spauth => {
+          res.render("home", {
+            queue: queue.queue,
+            history: queue.history,
+            current: queue.current,
+            authenticated: {
+              spotify: spauth,
+            },
+          });
+        });
     });
 
     app.get("/next", (_req, res) =>
