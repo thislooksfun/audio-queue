@@ -10,7 +10,8 @@
     "dev": "npm run build && npm start",
     "start": "node ./build/main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "tsc": "tsc"
+    "tsc": "tsc",
+    "purge": "rm -rf node_modules ; rm -rf data ; rm -rf build"
   },
   "author": "",
   "license": "ISC",
