@@ -17,14 +17,28 @@ if (devMode) {
   process.env.PATH += ":" + path.join(process.cwd(), "bin");
 }
 
-const updatePrefName = "media.gmp-manager.updateEnabled";
-let options = new Options().setPreference(updatePrefName, true);
-if (!devMode) {
-  options = options.headless();
+type Preferences = { [key: string]: string | number | boolean };
+function buildSettings(preferences?: Preferences) {
+  const updatePrefName = "media.gmp-manager.updateEnabled";
+  let options = new Options().setPreference(updatePrefName, true);
+  if (!devMode) {
+    options.headless();
+  } else {
+    options.headless();
+  }
+
+  if (preferences != null) {
+    for (const key in preferences) {
+      options.setPreference(key, preferences[key]);
+    }
+  }
+
+  return options;
 }
 
-export function createDriverSession() {
+export function createDriverSession(preferences?: Preferences) {
   log.info("Creating driver session");
+  const options = buildSettings(preferences);
   const service = new ServiceBuilder().enableVerboseLogging(true).build();
   return Driver.createSession(options, service);
 }
