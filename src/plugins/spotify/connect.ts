@@ -1,3 +1,5 @@
+/// <reference types="spotify-api" />
+
 // Built-in
 import fs from "fs";
 import path from "path";
@@ -5,10 +7,14 @@ import path from "path";
 import Promise from "bluebird";
 import SpotifyWebApi from "spotify-web-api-node";
 import uuidv4 from "uuid/v4";
-// Local
-import scopes from "./scopes";
-// Logging
 import log from "tlf-log";
+// Local
+import { SpotifyAudioTrack } from ".";
+import scopes from "./scopes";
+import player from "./player";
+import sleep from "../../util/sleep";
+
+type TrackPage = SpotifyApi.PagingObject<SpotifyApi.TrackObjectFull>;
 
 const isBalena = process.env.BALENA === "1";
 const uuid = process.env.BALENA_DEVICE_UUID;
@@ -76,6 +82,52 @@ function ensureAuthenticated() {
   });
 }
 
+function transferPlayback() {
+  return (
+    player
+      .getDeviceID()
+      .tap(id => console.log(`Transferring playback to ${id}`))
+      // @ts-ignore
+      .then(id => spotify.transferMyPlayback({ deviceIds: [id] }))
+      // Sleep for half a second to ensure that the device has changed.
+      .then(() => sleep(500))
+      .tap(() => console.log("Transferred playback"))
+  );
+}
+
+function reopenPlayer() {
+  const token = spotify.getAccessToken();
+  if (token == null) {
+    return Promise.reject("No token!");
+  }
+
+  return (
+    player
+      .close()
+      .then(() => player.open(token))
+      .then(() => transferPlayback())
+      // No-op if the player is already closed
+      .catch({ message: "Already closed" }, () => {})
+      .return()
+  );
+}
+
+function ensurePlayer() {
+  const token = spotify.getAccessToken();
+  if (token == null) {
+    return Promise.reject("No token!");
+  }
+
+  return (
+    player
+      .open(token)
+      // No-op if the player is already open
+      .catch({ message: "Already open" }, () => {})
+      .then(() => transferPlayback())
+      .return()
+  );
+}
+
 export default {
   isAuthenticated,
 
@@ -104,6 +156,7 @@ export default {
         // Store token on disk
         storeToken(refresh_token);
       })
+      .then(() => reopenPlayer())
       .tapCatch(() => {
         // Something went wrong while authorizing from a token.
         spotify.resetAccessToken();
@@ -111,14 +164,39 @@ export default {
         fs.unlinkSync(tokenPath);
       });
   },
-  play() {
+  play(uri?: string) {
     return ensureAuthenticated()
-      .then(() => spotify.play())
+      .then(ensurePlayer)
+      .then(() => (uri ? [uri] : undefined))
+      .then(uris => spotify.play({ uris }))
       .return();
   },
   pause() {
     return ensureAuthenticated()
       .then(() => spotify.pause())
       .return();
+  },
+
+  status() {
+    return ensureAuthenticated()
+      .then(() => spotify.getMyCurrentPlaybackState())
+      .then(resp => resp.body);
+  },
+
+  searchFor(query: string): Promise<SpotifyAudioTrack[]> {
+    log.trace(`Searching Spotify for ${query}`);
+    return ensureAuthenticated()
+      .then(() => spotify.searchTracks(query, { limit: 5 }))
+      .then(resp => <TrackPage>resp.body.tracks)
+      .then(tracks => tracks.items)
+      .map(track => ({
+        source: "spotify",
+        name: track.name,
+        artist: track.artists.map(a => a.name).join(" & "),
+        data: {
+          id: track.id,
+          uri: track.uri,
+        },
+      }));
   },
 };
