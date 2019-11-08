@@ -1,5 +1,8 @@
-import { AudioTrack, AudioSource } from "../player/queue";
+// 3rd party
+import Promise from "bluebird";
 import { Router } from "express";
+// Local
+import { AudioTrack, AudioSource } from "../player/queue";
 
 export interface Plugin {
   // Metadata
@@ -11,5 +14,5 @@ export interface Plugin {
 
   // Playback
   createAudioSource(track: AudioTrack): AudioSource;
-  searchFor(query: string): AudioTrack[];
+  searchFor(query: string): Promise<AudioTrack[]>;
 }

@@ -212,15 +212,15 @@ const plugin: Plugin = {
     }
   },
 
-  searchFor(query: string): YouTubeAudioTrack[] {
-    return [
+  searchFor(query: string): Promise<YouTubeAudioTrack[]> {
+    return Promise.resolve([
       {
         source: "youtube",
         name: `hello -- ${query}`,
         artist: "world",
         data: { slug: query },
       },
-    ];
+    ]);
   },
 };
 //#endregion Plugin
