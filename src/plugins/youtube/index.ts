@@ -172,6 +172,9 @@ function createAudioSource(track: YouTubeAudioTrack): YouTubeAudioSource {
           .return()
       );
     },
+    start() {
+      return this.resume();
+    },
     stop() {
       return Promise.resolve(track.data.driver)
         .then(d => (d ? d.close() : undefined))

@@ -25,6 +25,7 @@ export interface AudioSource {
   status: () => Promise<AudioStatus>;
   pause: () => Promise<void>;
   resume: () => Promise<void>;
+  start: () => Promise<void>;
   stop: () => Promise<void>;
 }
 
@@ -42,7 +43,7 @@ function start() {
   }
   log.info("Starting audio source...");
   return nowPlaying
-    .resume()
+    .start()
     .tap(() => log.info("Audio source started successfully"));
   // TODO: Preload next source?
 }
