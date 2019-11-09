@@ -1,0 +1,40 @@
+<style>
+  .queue {
+    background-color: #aaa;
+  }
+
+  .queue .track {
+    background-color: yellowgreen;
+  }
+
+  .queue .track form {
+    display: inline-block;
+  }
+</style>
+
+<div class="queue">
+  <span>Results:</span>
+
+  {{#each results}}
+  <div class="search-results-{{@key}}">
+    <h3>{{@key}}</h3>
+    <ol>
+      {{#each this}}
+      <li class="track">
+        {{!-- <img src="{{img}}" alt=""> --}}
+        <span class="title">{{name}}</span>
+        <span class="artist">{{artist}}</span>
+
+        <form action="/api/v1/enqueue" method="POST">
+          <input type="hidden" name="service" value="{{@../key}}">
+          {{#json-stringify this}}
+          <input type="hidden" name="track" value="{{this}}">
+          {{/json-stringify}}
+          <button type="submit">Add to Queue</button>
+        </form>
+      </li>
+      {{/each}}
+    </ol>
+  </div>
+  {{/each}}
+</div>
