@@ -39,6 +39,7 @@ COPY ./scripts ./scripts
 # Copy the files required for compiling the source code
 COPY ./tsconfig.json ./tsconfig.json
 COPY ./support ./support
+COPY ./views ./views
 COPY ./src ./src
 
 # Install all dependencies (including dev, so that we can compile TypeScript).
