@@ -23,8 +23,6 @@ function buildSettings(preferences?: Preferences) {
   let options = new Options().setPreference(updatePrefName, true);
   if (!devMode) {
     options.headless();
-  } else {
-    options.headless();
   }
 
   if (preferences != null) {
