@@ -108,6 +108,19 @@ function playpause(driver: Driver): Promise<void> {
     .return();
 }
 
+function disableAutoplay(driver: Driver): Promise<void> {
+  return (
+    Promise.resolve()
+      // Wait until the autoplay toggle appears
+      .then(() => driver.wait(until.elementLocated(By.id("autoplay"))))
+      // If it's turned on, turn it off
+      .then(() => By.css("#autoplay + paper-toggle-button#toggle[checked]"))
+      .then(by => driver.findElements(by))
+      .each(e => e.click())
+      .return()
+  );
+}
+
 function createAudioSource(track: YouTubeAudioTrack): YouTubeAudioSource {
   return {
     track,
@@ -175,7 +188,10 @@ function createAudioSource(track: YouTubeAudioTrack): YouTubeAudioSource {
       );
     },
     start() {
-      return this.resume();
+      return this.preload()
+        .then(() => track.data.driver as Driver)
+        .then(d => disableAutoplay(d))
+        .then(() => this.resume());
     },
     stop() {
       return Promise.resolve(track.data.driver)
