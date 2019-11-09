@@ -6,7 +6,8 @@ import { AudioTrack, AudioSource, AudioStatus } from "../../player/queue";
 import { registerPages, registerAPI } from "./router";
 // Logging
 import log from "tlf-log";
-import connect from "./connect";
+import connect, { isAuthenticated } from "./connect";
+import player from "./player";
 
 //#region Interfaces
 export interface SpotifyStatus extends AudioStatus {
@@ -77,6 +78,9 @@ function createAudioSource(track: SpotifyAudioTrack): SpotifyAudioSource {
 const plugin: Plugin = {
   // Metadata
   name: "spotify",
+
+  // Authentication
+  isAuthenticated,
 
   // Routing
   registerPages,
