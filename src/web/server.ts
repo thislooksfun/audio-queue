@@ -5,16 +5,16 @@
 // import fs from "fs";
 import { execSync } from "child_process";
 // 3rd-party
+import Promise from "bluebird";
 import express, { Request, Response } from "express";
 import exphbs from "express-handlebars";
 import bodyParser from "body-parser";
 import methodOverride from "method-override";
 import log from "tlf-log";
+import { flatMap } from "lodash";
 // Local
-import queue from "../player/queue";
+import queue, { AudioTrack } from "../player/queue";
 import plugins from "../plugins";
-import youtube from "../plugins/youtube";
-import connect from "../plugins/spotify/connect";
 
 const app = express();
 const port = parseInt(process.argv[2]) || 8080;
@@ -73,17 +73,26 @@ export default {
     //#region Global routes
     app.get("/", (_req, res) => {
       return Promise.resolve()
-        .then(() => connect.isAuthenticated())
-        .then(spauth => {
+        .then(() => Object.values(plugins))
+        .filter(({ isAuthenticated }) => isAuthenticated != null)
+        .map(plugin =>
+          // @ts-ignore
+          Promise.all([plugin.name, plugin.isAuthenticated()])
+        )
+        .then(entries =>
+          entries.reduce((o: { [key: string]: boolean }, [n, a]) => {
+            o[n] = a;
+            return o;
+          }, {})
+        )
+        .then(authenticated =>
           res.render("home", {
             queue: queue.queue,
             history: queue.history,
             current: queue.current,
-            authenticated: {
-              spotify: spauth,
-            },
-          });
-        });
+            authenticated,
+          })
+        );
     });
 
     app.get("/next", (_req, res) =>
@@ -104,7 +113,7 @@ export default {
     const apiv1Router = express.Router();
 
     //#region Plugin routes
-    plugins.forEach(plugin => {
+    Object.values(plugins).forEach(plugin => {
       if (plugin.registerAPI != null) {
         log.trace(`Registering API routes for ${plugin.name}`);
         const pr = express.Router();
@@ -162,19 +171,19 @@ export default {
       if (typeof req.body !== "object") {
         return res.status(400).send("Invalid Request");
       }
-      // Currently only YouTube is supported
-      // TODO: Allow for other services/plugins
-      if (req.body.service !== "youtube") {
+
+      const plugin = plugins[req.body.service];
+      if (plugin == null) {
         return res.status(400).send("Invalid Request");
       }
 
-      log.trace(`Enqueuing YT video ${req.body.slug}`);
+      const track = <AudioTrack>JSON.parse(req.body.track);
 
-      return apiWrap(res, `enqueuing ${req.body.slug}`, () => {
+      log.trace(`Enqueuing ${track.name} via ${plugin.name}`);
+
+      return apiWrap(res, `enqueuing ${track.name} via ${plugin.name}`, () => {
         return Promise.resolve()
-          .then(() => youtube.searchFor(req.body.slug))
-          .then(arr => arr[0])
-          .then(at => youtube.createAudioSource(at))
+          .then(() => plugin.createAudioSource(track))
           .then(as => queue.enqueue(as));
       });
     });
