@@ -43,10 +43,11 @@ function start() {
     return Promise.resolve();
   }
   log.info("Starting audio source...");
+  updateLock++;
   return nowPlaying
     .start()
-    .tap(() => log.info("Audio source started successfully"));
-  // TODO: Preload next source?
+    .tap(() => log.info("Audio source started successfully"))
+    .finally(() => updateLock--);
 }
 
 function enqueue(as: AudioSource): Promise<void> {
@@ -64,6 +65,7 @@ function enqueue(as: AudioSource): Promise<void> {
 
 function next() {
   log.info("Transitioning to the next track...");
+  updateLock++;
   return Promise.resolve()
     .then(() => {
       if (!nowPlaying) return;
@@ -73,7 +75,8 @@ function next() {
       return nowPlaying.stop();
     })
     .then(() => (nowPlaying = queue.shift()))
-    .then(start);
+    .then(start)
+    .finally(() => updateLock--);
 }
 
 function preloadNext() {
@@ -88,6 +91,7 @@ function preloadNext() {
 
 function previous() {
   log.info("Transitioning to the previous track...");
+  updateLock++;
   return Promise.resolve()
     .then(() => {
       if (!nowPlaying) return;
@@ -97,7 +101,8 @@ function previous() {
       return nowPlaying.stop();
     })
     .then(() => (nowPlaying = history.pop()))
-    .then(start);
+    .then(start)
+    .finally(() => updateLock--);
 }
 
 function playpause() {
@@ -105,10 +110,12 @@ function playpause() {
     return Promise.resolve();
   }
 
+  updateLock++;
   const np: AudioSource = nowPlaying;
   return Promise.resolve()
     .then(() => np.status())
-    .then(({ playing }) => (playing ? np.pause() : np.resume()));
+    .then(({ playing }) => (playing ? np.pause() : np.resume()))
+    .finally(() => updateLock--);
 }
 
 function shiftUp(index: number) {
@@ -125,7 +132,36 @@ function shiftDown(index: number) {
   swap(queue, index, index + 1);
 }
 
-// TODO: Finalize API
+let updateLock = 0;
+function checkState() {
+  if (nowPlaying == null) return;
+
+  // Prevent multiple checks at the same time
+  if (updateLock > 0) return;
+  updateLock++;
+
+  log.trace_(`Checking status of ${nowPlaying.track.name}: `);
+
+  nowPlaying
+    .status()
+    .tap(s =>
+      log.trace(
+        `${s.time.toFixed(2)}/${s.duration.toFixed(2)} (${
+          s.playing ? "playing" : "paused"
+        }; ${s.finished ? "finished" : "not finished"})`
+      )
+    )
+    .tapCatch(() => log.trace())
+    .then(s => {
+      // TODO: Preload next source?
+      if (s.finished && autoplay) {
+        log.trace("Track finished! Loading the next one...");
+        next();
+      }
+    })
+    .finally(() => updateLock--);
+}
+
 export default {
   enqueue,
   next,
@@ -148,3 +184,6 @@ export default {
     return history.map(s => s.track);
   },
 };
+
+// Check the state every 1/4 second.
+setInterval(checkState, 250);
