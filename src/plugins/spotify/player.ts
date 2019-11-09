@@ -38,6 +38,7 @@ export default {
     if (!driver) {
       return Promise.reject(new Error("No driver"));
     }
+
     let d: Driver = driver;
     return Promise.resolve()
       .then(() => d.findElement(By.id("device_id")))
