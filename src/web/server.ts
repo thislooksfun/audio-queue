@@ -25,6 +25,10 @@ function hbsSection(this: any, name: string, opts: any) {
   return null;
 }
 
+function hbsJsonStringify(this: any, data: any, opts: any) {
+  return opts.fn(JSON.stringify(data));
+}
+
 function methodOverrideBody(req: Request, _res: Response) {
   if (req.body && typeof req.body === "object" && "_method" in req.body) {
     // look in urlencoded POST bodies and delete it
@@ -57,7 +61,13 @@ function apiWrap<T>(
 export default {
   start: function() {
     // Register handlebars
-    const hbsOpts = { extname: ".hbs", helpers: { section: hbsSection } };
+    const hbsOpts = {
+      extname: ".hbs",
+      helpers: {
+        section: hbsSection,
+        "json-stringify": hbsJsonStringify,
+      },
+    };
     app.engine(".hbs", exphbs(hbsOpts));
     app.set("view engine", ".hbs");
 
@@ -93,6 +103,37 @@ export default {
             authenticated,
           })
         );
+    });
+
+    app.get("/search", (req, res) => {
+      const q = req.query.q || "";
+
+      if (q == "") {
+        return res.status(400).send("Bad Request");
+      }
+
+      return Promise.resolve()
+        .then(() => Object.values(plugins))
+        .map(p => p.searchFor(q))
+        .all()
+        .then(a => flatMap(a))
+        .then(results =>
+          results.reduce((o: { [key: string]: AudioTrack[] }, t) => {
+            o[t.source] = o[t.source] || [];
+            o[t.source].push(t);
+            return o;
+          }, {})
+        )
+        .then(results =>
+          res.render("search", {
+            current: queue.current,
+            results,
+          })
+        )
+        .catch(e => {
+          console.log(e);
+          res.status(500).send("Something went wrong!");
+        });
     });
 
     app.get("/next", (_req, res) =>
