@@ -30,6 +30,7 @@ interface State {
   paused: boolean | null;
   time: number | null;
   duration: number | null;
+  ended: boolean | null;
 }
 interface YTVideo {
   slug: string;
@@ -132,6 +133,7 @@ function createAudioSource(track: YouTubeAudioTrack): YouTubeAudioSource {
         .then(() => <State>track.data.state)
         .then(state => ({
           playing: !state.paused,
+          finished: !!state.ended,
           time: state.time || -1,
           duration: state.duration || -1,
         }));

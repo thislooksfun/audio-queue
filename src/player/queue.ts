@@ -6,6 +6,7 @@ import swap from "../util/swap";
 
 export interface AudioStatus {
   playing: boolean;
+  finished: boolean;
   time: number;
   duration: number;
 }

@@ -7,8 +7,20 @@
     <title>Spotify Web Player (loading)</title>
   </head>
   <body>
+    <span id="device_id"></span>
+    <span id="device_state">loading</span>
+
+    <span id="track_duration">0</span>
+    <span id="track_position">0</span>
+    <span id="track_id"></span>
+    <span id="track_uri"></span>
+
+    <button id="refresh_state" onclick="refreshState()">Refresh state</button>
+
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
     <script>
+      window.refreshState = () => {};
+
       window.onSpotifyWebPlaybackSDKReady = () => {
         const token = window.location.hash.slice(1);
         const player = new Spotify.Player({
@@ -32,15 +44,32 @@
           console.error(message);
         });
 
+        const onState = state => {
+          const track = state.track_window.current_track;
+
+          if (!state.paused) {
+            document.getElementById("device_state").innerText = "playing";
+          } else {
+            document.getElementById("device_state").innerText = "paused";
+          }
+
+          document.getElementById("track_duration").innerText = state.duration;
+          document.getElementById("track_position").innerText = state.position;
+          document.getElementById("track_id").innerText = track.id;
+          document.getElementById("track_uri").innerText = track.uri;
+        };
+
         // Playback status updates
-        player.addListener("player_state_changed", state => {
-          console.log(state);
-        });
+        player.addListener("player_state_changed", onState);
 
         // Ready
         player.addListener("ready", ({ device_id }) => {
-          console.log("Ready with Device ID", device_id);
-          document.getElementById("device_id").innerText = device_id;
+          // Set volume to 50%
+          player.setVolume(0.5).then(() => {
+            console.log("Ready with Device ID", device_id);
+            document.getElementById("device_id").innerText = device_id;
+            document.getElementById("device_state").innerText = "ready";
+          });
         });
 
         // Not Ready
@@ -51,8 +80,9 @@
 
         // Connect to the player!
         player.connect().then(() => (document.title = "Spotify Web Player"));
+
+        window.refreshState = () => player.getCurrentState().then(onState);
       };
     </script>
-    <span id="device_id"></span>
   </body>
 </html>

@@ -15,6 +15,7 @@ export interface SpotifyStatus extends AudioStatus {
 export interface SpotifyData {
   id: string;
   uri: string;
+  started: boolean;
 }
 export interface SpotifyAudioTrack extends AudioTrack {
   source: "spotify";
@@ -45,26 +46,16 @@ function createAudioSource(track: SpotifyAudioTrack): SpotifyAudioSource {
       return Promise.reject("Not implemented");
     },
     status(): Promise<SpotifyStatus> {
-      log.debug("SpotifyAudioSource.status()");
-      return connect.status().then(st => {
-        if (st.device.id == null) {
-          return { deviceID: null, playing: false, time: 0, duration: 0 };
-        }
-
-        const deviceID = st.device.id;
-
-        if (st.item == null) {
-          return { deviceID, playing: false, time: 0, duration: 0 };
-        }
-
-        const track: SpotifyApi.TrackObjectFull = st.item;
-
-        const playing = st.is_playing;
-        const time = (st.progress_ms || 0) * 1000;
-        const duration = track.duration_ms * 1000;
-
-        return { deviceID, playing, time, duration };
-      });
+      return (
+        player
+          .getStatus()
+          .tap(s => (track.data.started = track.data.started || s.time > 0))
+          // When the track is finished it automatically pauses and sets the
+          // time to 0
+          .tap(
+            s => (s.finished = track.data.started && s.time == 0 && !s.playing)
+          )
+      );
     },
     pause() {
       return connect.pause();
