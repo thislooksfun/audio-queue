@@ -57,7 +57,7 @@ if (fs.existsSync(tokenPath)) {
   spotify.setRefreshToken(refreshToken);
 }
 
-function isAuthenticated() {
+export function isAuthenticated() {
   if (spotify.getRefreshToken() == null) {
     // No refresh token found, definitely not authenticated.
     return Promise.resolve(false);
@@ -169,6 +169,7 @@ export default {
       .then(ensurePlayer)
       .then(() => (uri ? [uri] : undefined))
       .then(uris => spotify.play({ uris }))
+      .then(() => player.waitForPlayback(uri))
       .return();
   },
   pause() {
@@ -196,6 +197,7 @@ export default {
         data: {
           id: track.id,
           uri: track.uri,
+          started: false,
         },
       }));
   },
