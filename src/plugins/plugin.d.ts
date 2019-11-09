@@ -8,6 +8,9 @@ export interface Plugin {
   // Metadata
   name: string;
 
+  // Authentication
+  isAuthenticated?(): Promise<boolean>;
+
   // Routing
   registerPages?(router: Router): void;
   registerAPI?(router: Router): void;
