@@ -17,7 +17,7 @@
 
   {{#each results}}
   <div class="search-results-{{@key}}">
-    <h3>{{@key}}</h3>
+    <h3>{{@key}} ({{this.length}} {{pluralize this.length "result" "results"}})</h3>
     <ol>
       {{#each this}}
       <li class="track">
