@@ -1,0 +1,49 @@
+.DS_Store
+node_modules
+/bin
+/build
+/data
+
+# (local) env files
+.env
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Coverage report
+/coverage
+
+# Binary files
+*.ico
+*.png
+
+# SVG files, pending the resolution of https://github.com/prettier/prettier/issues/5322
+# TODO: remove this ignore after the aforementioned issue is resolved.
+*.svg
+
+*.hbs
+
+# Misc files
+.browserslistrc
+.gitattributes
+.gitignore
+.prettierignore
+LICENSE
+bpl
+gpbf
+Dockerfile.template
+scripts/start
+/conf
