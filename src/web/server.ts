@@ -112,6 +112,15 @@ export default {
         );
     });
 
+    app.get("/history", (_req, res) => {
+      return Promise.resolve().then(() =>
+        res.render("history", {
+          history: queue.history,
+          current: queue.current,
+        })
+      );
+    });
+
     app.get("/search", (req, res) => {
       const q = req.query.q || "";
 
