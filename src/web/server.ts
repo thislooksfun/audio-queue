@@ -11,7 +11,6 @@ import exphbs from "express-handlebars";
 import bodyParser from "body-parser";
 import methodOverride from "method-override";
 import log from "tlf-log";
-import { flatMap } from "lodash";
 // Local
 import queue, { AudioTrack } from "../player/queue";
 import plugins from "../plugins";
@@ -117,13 +116,14 @@ export default {
 
       return Promise.resolve()
         .then(() => Object.values(plugins))
-        .map(p => p.searchFor(q))
+        .map(p => p.searchFor(q).then(r => ({ name: p.name, results: r })))
         .all()
-        .then(a => flatMap(a))
-        .then(results =>
-          results.reduce((o: { [key: string]: AudioTrack[] }, t) => {
-            o[t.source] = o[t.source] || [];
-            o[t.source].push(t);
+        .filter(r => r.results != null)
+        .then(a => <{ name: string; results: AudioTrack[] }[]>a)
+        .then(arr =>
+          arr.reduce((o: { [key: string]: AudioTrack[] }, t) => {
+            o[t.name] = o[t.name] || [];
+            o[t.name].push(...t.results);
             return o;
           }, {})
         )

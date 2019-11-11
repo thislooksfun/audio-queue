@@ -17,5 +17,5 @@ export interface Plugin {
 
   // Playback
   createAudioSource(track: AudioTrack): AudioSource;
-  searchFor(query: string): Promise<AudioTrack[]>;
+  searchFor(query: string): Promise<AudioTrack[] | null>;
 }
