@@ -35,6 +35,11 @@
         <input type="hidden" name="index" value="{{@index}}">
         <button type="submit" {{#if @last}}disabled{{/if}}>↓</button>
       </form>
+      <form action="/api/v1/queue/remove" method="POST" class="remove">
+        <input type="hidden" name="_method" value="put">
+        <input type="hidden" name="index" value="{{@index}}">
+        <button type="submit">Remove</button>
+      </form>
     </li>
     {{/each}}
   </ol>
