@@ -26,7 +26,7 @@
         <span class="artist">{{artist}}</span>
 
         <form action="/api/v1/enqueue" method="POST">
-          <input type="hidden" name="service" value="{{@../key}}">
+          <input type="hidden" name="service" value="{{source}}">
           {{#json-stringify this}}
           <input type="hidden" name="track" value="{{this}}">
           {{/json-stringify}}
