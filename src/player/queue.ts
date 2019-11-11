@@ -132,6 +132,13 @@ function shiftDown(index: number) {
   swap(queue, index, index + 1);
 }
 
+function remove(index: number) {
+  if (index < 0 || index >= queue.length - 1) {
+    throw new Error("Out of bounds!");
+  }
+  queue.splice(index, 1);
+}
+
 let updateLock = 0;
 function checkState() {
   if (nowPlaying == null) return;
@@ -172,6 +179,7 @@ export default {
 
   shiftUp,
   shiftDown,
+  remove,
 
   // Wrappers for displaying queue and history
   get current() {
