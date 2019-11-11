@@ -222,6 +222,7 @@ function createAudioSource(track: YouTubeAudioTrack): YouTubeAudioSource {
 //#endregion Helper functions
 
 //#region Plugin
+const ytregex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/;
 const plugin: Plugin = {
   name: "youtube",
 
@@ -233,13 +234,22 @@ const plugin: Plugin = {
     }
   },
 
-  searchFor(query: string): Promise<YouTubeAudioTrack[]> {
+  searchFor(query: string): Promise<YouTubeAudioTrack[] | null> {
+    log.trace(`Searching YouTube for ${query}`);
+
+    const match = query.match(ytregex);
+
+    if (match == null || match.length < 2) {
+      return Promise.resolve(null);
+    }
+
+    const id = match[1];
     return Promise.resolve([
       {
         source: "youtube",
-        name: `hello -- ${query}`,
+        name: `hello -- ${id}`,
         artist: "world",
-        data: { slug: query },
+        data: { slug: id },
       },
     ]);
   },
