@@ -139,10 +139,6 @@ export default {
         });
     });
 
-    app.get("/next", (_req, res) =>
-      queue.next().then(() => res.send("success"))
-    );
-
     app.get("/volume/:percent", (req, res) => {
       const volume = parseFloat(req.params.percent);
       if (isNaN(volume)) {
