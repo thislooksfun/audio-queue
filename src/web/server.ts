@@ -29,6 +29,10 @@ const hbsHelpers = {
   "json-stringify"(this: any, data: any, opts: any) {
     return opts.fn(JSON.stringify(data));
   },
+
+  pluralize(this: any, number: number, single: string, plural: string) {
+    return number === 1 ? single : plural;
+  },
 };
 
 function methodOverrideBody(req: Request, _res: Response) {
