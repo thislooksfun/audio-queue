@@ -2,6 +2,10 @@
   .history-list .track {
     background-color: yellowgreen;
   }
+
+  .history-list .track form {
+    display: inline-block;
+  }
 </style>
 
 <ol class="history-list">
@@ -11,6 +15,14 @@
     <span class="title">{{name}}</span>
     <span class="artist">{{artist}}</span>
     <span class="source">{{source}}</span>
+
+    <form action="/api/v1/enqueue" method="POST">
+      <input type="hidden" name="service" value="{{source}}">
+      {{#json-stringify this}}
+      <input type="hidden" name="track" value="{{this}}">
+      {{/json-stringify}}
+      <button type="submit">Replay</button>
+    </form>
   </li>
   {{/each}}
 </ol>
