@@ -211,6 +211,17 @@ export default {
       return apiWrap(res, action, () => shift(parseInt(req.body.index)));
     });
 
+    apiv1Router.put("/queue/remove", (req, res) => {
+      if (typeof req.body !== "object") {
+        return res.status(400).send("Invalid Request");
+      }
+
+      log.trace(`Removing item at index ${req.body.index}`);
+
+      const action = `removing item at index ${req.body.index}`;
+      return apiWrap(res, action, () => queue.remove(parseInt(req.body.index)));
+    });
+
     apiv1Router.post("/enqueue", (req, res) => {
       if (typeof req.body !== "object") {
         return res.status(400).send("Invalid Request");
