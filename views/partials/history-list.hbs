@@ -1,23 +1,16 @@
 <style>
-  .history {
-    background-color: #aaa;
-  }
-
-  .history .track {
+  .history-list .track {
     background-color: yellowgreen;
   }
 </style>
 
-
-<div class="history">
-  <ol class="history">
-    {{#each history}}
-    <li class="track">
-      {{!-- <img src="{{img}}" alt=""> --}}
-      <span class="title">{{name}}</span>
-      <span class="artist">{{artist}}</span>
-      <span class="source">{{source}}</span>
-    </li>
-    {{/each}}
-  </ol>
-</div>
+<ol class="history-list">
+  {{#each history}}
+  <li class="track">
+    {{!-- <img src="{{img}}" alt=""> --}}
+    <span class="title">{{name}}</span>
+    <span class="artist">{{artist}}</span>
+    <span class="source">{{source}}</span>
+  </li>
+  {{/each}}
+</ol>
