@@ -138,16 +138,6 @@ export default {
           res.status(500).send("Something went wrong!");
         });
     });
-
-    app.get("/volume/:percent", (req, res) => {
-      const volume = parseFloat(req.params.percent);
-      if (isNaN(volume)) {
-        res.status(400).send("Invalid volume level");
-      } else {
-        execSync(`amixer sset PCM,0 ${volume}% > /dev/null &`);
-        res.send(`Volume set to ${volume}%`);
-      }
-    });
     //#endregion Global routes
 
     const apiv1Router = express.Router();
@@ -173,6 +163,17 @@ export default {
     //#region API v1 routes
     apiv1Router.get("/ping", (_req, res) => {
       res.send("Pong!");
+    });
+
+    apiv1Router.put("/volume", (req, res) => {
+      const volume = parseFloat(req.body.percent);
+      if (isNaN(volume)) {
+        res.status(400).send("Invalid volume level");
+      }
+
+      return apiWrap(res, `setting volume to ${volume}`, () =>
+        execSync(`amixer sset PCM,0 ${volume}% > /dev/null &`)
+      );
     });
 
     apiv1Router.put("/queue/next", (_req, res) => {
