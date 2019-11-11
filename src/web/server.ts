@@ -19,15 +19,17 @@ import plugins from "../plugins";
 const app = express();
 const port = parseInt(process.argv[2]) || 8080;
 
-function hbsSection(this: any, name: string, opts: any) {
-  this._sections = this._sections || {};
-  this._sections[name] = opts.fn(this);
-  return null;
-}
+const hbsHelpers = {
+  section(this: any, name: string, opts: any) {
+    this._sections = this._sections || {};
+    this._sections[name] = opts.fn(this);
+    return null;
+  },
 
-function hbsJsonStringify(this: any, data: any, opts: any) {
-  return opts.fn(JSON.stringify(data));
-}
+  "json-stringify"(this: any, data: any, opts: any) {
+    return opts.fn(JSON.stringify(data));
+  },
+};
 
 function methodOverrideBody(req: Request, _res: Response) {
   if (req.body && typeof req.body === "object" && "_method" in req.body) {
@@ -63,10 +65,7 @@ export default {
     // Register handlebars
     const hbsOpts = {
       extname: ".hbs",
-      helpers: {
-        section: hbsSection,
-        "json-stringify": hbsJsonStringify,
-      },
+      helpers: hbsHelpers,
     };
     app.engine(".hbs", exphbs(hbsOpts));
     app.set("view engine", ".hbs");
