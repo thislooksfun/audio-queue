@@ -105,7 +105,7 @@ export default {
         .then(authenticated =>
           res.render("home", {
             queue: queue.queue,
-            history: queue.history,
+            history: queue.history.slice(-5),
             current: queue.current,
             authenticated,
           })
