@@ -63,6 +63,22 @@ function apiWrap<T>(
   );
 }
 
+function getAuthenticationStatuses() {
+  return Promise.resolve()
+    .then(() => Object.values(plugins))
+    .filter(({ isAuthenticated }) => isAuthenticated != null)
+    .map(plugin =>
+      // @ts-ignore
+      Promise.all([plugin.name, plugin.isAuthenticated()])
+    )
+    .then(entries =>
+      entries.reduce((o: { [key: string]: boolean }, [n, a]) => {
+        o[n] = a;
+        return o;
+      }, {})
+    );
+}
+
 export default {
   start: function() {
     // Register handlebars
@@ -85,18 +101,7 @@ export default {
     //#region Global routes
     app.get("/", (_req, res) => {
       return Promise.resolve()
-        .then(() => Object.values(plugins))
-        .filter(({ isAuthenticated }) => isAuthenticated != null)
-        .map(plugin =>
-          // @ts-ignore
-          Promise.all([plugin.name, plugin.isAuthenticated()])
-        )
-        .then(entries =>
-          entries.reduce((o: { [key: string]: boolean }, [n, a]) => {
-            o[n] = a;
-            return o;
-          }, {})
-        )
+        .then(getAuthenticationStatuses)
         .then(authenticated =>
           res.render("home", {
             queue: queue.queue,
