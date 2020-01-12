@@ -7,7 +7,6 @@ import { execSync } from "child_process";
 // 3rd-party
 import Promise from "bluebird";
 import express, { Request, Response } from "express";
-import exphbs from "express-handlebars";
 import bodyParser from "body-parser";
 import methodOverride from "method-override";
 import log from "tlf-log";
@@ -17,22 +16,6 @@ import plugins from "../plugins";
 
 const app = express();
 const port = parseInt(process.argv[2]) || 8080;
-
-const hbsHelpers = {
-  section(this: any, name: string, opts: any) {
-    this._sections = this._sections || {};
-    this._sections[name] = opts.fn(this);
-    return null;
-  },
-
-  "json-stringify"(this: any, data: any, opts: any) {
-    return opts.fn(JSON.stringify(data));
-  },
-
-  pluralize(this: any, number: number, single: string, plural: string) {
-    return number === 1 ? single : plural;
-  },
-};
 
 function methodOverrideBody(req: Request, _res: Response) {
   if (req.body && typeof req.body === "object" && "_method" in req.body) {
@@ -63,31 +46,25 @@ function apiWrap<T>(
   );
 }
 
-function getAuthenticationStatuses() {
-  return Promise.resolve()
-    .then(() => Object.values(plugins))
-    .filter(({ isAuthenticated }) => isAuthenticated != null)
-    .map(plugin =>
-      // @ts-ignore
-      Promise.all([plugin.name, plugin.isAuthenticated()])
-    )
-    .then(entries =>
-      entries.reduce((o: { [key: string]: boolean }, [n, a]) => {
-        o[n] = a;
-        return o;
-      }, {})
-    );
-}
+// function getAuthenticationStatuses() {
+//   return Promise.resolve()
+//     .then(() => Object.values(plugins))
+//     .filter(({ isAuthenticated }) => isAuthenticated != null)
+//     .map(plugin =>
+//       // @ts-ignore
+//       Promise.all([plugin.name, plugin.isAuthenticated()])
+//     )
+//     .then(entries =>
+//       entries.reduce((o: { [key: string]: boolean }, [n, a]) => {
+//         o[n] = a;
+//         return o;
+//       }, {})
+//     );
+// }
 
 export default {
   start: function() {
-    // Register handlebars
-    const hbsOpts = {
-      extname: ".hbs",
-      helpers: hbsHelpers,
-    };
-    app.engine(".hbs", exphbs(hbsOpts));
-    app.set("view engine", ".hbs");
+    app.use(express.static("frontend/dist"));
 
     // Parse application/x-www-form-urlencoded
     app.use(bodyParser.urlencoded({ extended: false }));
@@ -100,58 +77,60 @@ export default {
 
     //#region Global routes
     app.get("/", (_req, res) => {
-      return Promise.resolve()
-        .then(getAuthenticationStatuses)
-        .then(authenticated =>
-          res.render("home", {
-            queue: queue.queue,
-            history: queue.history.slice(-5),
-            current: queue.current,
-            authenticated,
-          })
-        );
+      res.sendFile("frontend/dist/index.html");
+
+      // return Promise.resolve()
+      //   .then(getAuthenticationStatuses)
+      //   .then(authenticated =>
+      //     res.render("home", {
+      //       queue: queue.queue,
+      //       history: queue.history.slice(-5),
+      //       current: queue.current,
+      //       authenticated,
+      //     })
+      //   );
     });
 
-    app.get("/history", (_req, res) => {
-      return Promise.resolve().then(() =>
-        res.render("history", {
-          history: queue.history,
-          current: queue.current,
-        })
-      );
-    });
+    // app.get("/history", (_req, res) => {
+    //   return Promise.resolve().then(() =>
+    //     res.render("history", {
+    //       history: queue.history,
+    //       current: queue.current,
+    //     })
+    //   );
+    // });
 
-    app.get("/search", (req, res) => {
-      const q = req.query.q || "";
+    // app.get("/search", (req, res) => {
+    //   const q = req.query.q || "";
 
-      if (q == "") {
-        return res.status(400).send("Bad Request");
-      }
+    //   if (q == "") {
+    //     return res.status(400).send("Bad Request");
+    //   }
 
-      return Promise.resolve()
-        .then(() => Object.values(plugins))
-        .map(p => p.searchFor(q).then(r => ({ name: p.name, results: r })))
-        .all()
-        .filter(r => r.results != null)
-        .then(a => <{ name: string; results: AudioTrack[] }[]>a)
-        .then(arr =>
-          arr.reduce((o: { [key: string]: AudioTrack[] }, t) => {
-            o[t.name] = o[t.name] || [];
-            o[t.name].push(...t.results);
-            return o;
-          }, {})
-        )
-        .then(results =>
-          res.render("search", {
-            current: queue.current,
-            results,
-          })
-        )
-        .catch(e => {
-          console.log(e);
-          res.status(500).send("Something went wrong!");
-        });
-    });
+    //   return Promise.resolve()
+    //     .then(() => Object.values(plugins))
+    //     .map(p => p.searchFor(q).then(r => ({ name: p.name, results: r })))
+    //     .all()
+    //     .filter(r => r.results != null)
+    //     .then(a => <{ name: string; results: AudioTrack[] }[]>a)
+    //     .then(arr =>
+    //       arr.reduce((o: { [key: string]: AudioTrack[] }, t) => {
+    //         o[t.name] = o[t.name] || [];
+    //         o[t.name].push(...t.results);
+    //         return o;
+    //       }, {})
+    //     )
+    //     .then(results =>
+    //       res.render("search", {
+    //         current: queue.current,
+    //         results,
+    //       })
+    //     )
+    //     .catch(e => {
+    //       console.log(e);
+    //       res.status(500).send("Something went wrong!");
+    //     });
+    // });
     //#endregion Global routes
 
     const apiv1Router = express.Router();
