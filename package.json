@@ -13,7 +13,7 @@
     "tsc": "tsc",
     "prettier:check": "prettier --check '**/*'",
     "prettier:fix": "prettier --write '**/*'",
-    "purge": "rm -rf node_modules ; rm -rf data ; rm -rf build"
+    "purge": "rm -rf node_modules ; rm -rf data ; rm -rf build ; (cd frontend && npm run purge)",
   },
   "author": "",
   "license": "ISC",
