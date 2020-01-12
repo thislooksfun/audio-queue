@@ -63,7 +63,7 @@ function apiWrap<T>(
 // }
 
 export default {
-  start: function() {
+  start() {
     app.use(express.static("frontend/dist"));
 
     // Parse application/x-www-form-urlencoded
