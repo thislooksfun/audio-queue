@@ -78,6 +78,7 @@ function createAudioSource(track: SpotifyAudioTrack): SpotifyAudioSource {
 const plugin: Plugin = {
   // Metadata
   name: "spotify",
+  displayName: "Spotify",
 
   // Authentication
   isAuthenticated,

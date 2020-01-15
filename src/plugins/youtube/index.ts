@@ -225,6 +225,7 @@ function createAudioSource(track: YouTubeAudioTrack): YouTubeAudioSource {
 const ytregex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/;
 const plugin: Plugin = {
   name: "youtube",
+  displayName: "YouTube",
 
   createAudioSource(track: AudioTrack): YouTubeAudioSource {
     if (isYTAudioTrack(track)) {

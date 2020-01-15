@@ -7,6 +7,7 @@ import { AudioTrack, AudioSource } from "../player/queue";
 export interface Plugin {
   // Metadata
   name: string;
+  displayName: string;
 
   // Authentication
   isAuthenticated?(): Promise<boolean>;
