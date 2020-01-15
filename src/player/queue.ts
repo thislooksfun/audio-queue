@@ -209,6 +209,15 @@ function checkState() {
     .finally(() => updateLock--);
 }
 
+function status(): Promise<AudioStatus | null> {
+  if (nowPlaying == null) {
+    return Promise.resolve(null);
+  }
+
+  updateLock++;
+  return nowPlaying.status();
+}
+
 export default {
   enqueueSource,
   enqueueTrack,
@@ -221,6 +230,8 @@ export default {
 
   shift,
   remove,
+
+  status,
 
   // Wrappers for displaying queue and history
   get current() {
