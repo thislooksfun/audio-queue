@@ -3,7 +3,6 @@
 // Built-in
 // import path from "path";
 // import fs from "fs";
-import { execSync } from "child_process";
 import httpServer from "http";
 // 3rd-party
 import Promise from "bluebird";
