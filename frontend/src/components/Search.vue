@@ -1,5 +1,15 @@
 <template>
   <div class="search-bar" @click="focus" v-click-outside="unfocus">
+    <div class="logo">
+      <img
+        class="braid-logo"
+        svg-inline
+        src="../../../icon/braid.svg"
+        alt="Braid Logo"
+      />
+      <h2 class="braid-name">Braid</h2>
+    </div>
+
     <div class="center">
       <div class="search-box">
         <form @submit.prevent>
@@ -84,6 +94,34 @@ export default {
   left: 0;
   background-color: #712f79;
   color: #fff;
+
+  .logo {
+    position: absolute;
+    left: 1.5rem;
+    top: 0;
+
+    height: 4rem;
+
+    .braid-logo {
+      height: 4rem;
+      width: 4rem;
+
+      padding: 0.25rem;
+
+      .braid-square,
+      .braid-loop {
+        stroke: #fff;
+      }
+    }
+
+    .braid-name {
+      display: inline-block;
+      position: absolute;
+      top: 0;
+      line-height: 4.25rem;
+      margin: 0;
+    }
+  }
 
   .search-box {
     display: inline-block;
