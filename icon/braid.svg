@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg  PUBLIC '-//W3C//DTD SVG 1.1//EN'  'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
+<svg version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <path id="a" d="m46.5 30h23.5v9.5m0 7v23.5h-9.5m-7 0h-23.5v-9.5m0-7v-23.5h9.5"/>
+        <path id="b" d="m26.5 43h-12l-7 7 7 7h25m-6-14h20m-7 14h20m-6-14h25l7 7-7 7h-12"/>
+    </defs>
+    <g stroke="#000" transform="rotate(45 50 50)" fill-opacity="0" stroke-width="5">
+        <use class="braid-square" xlink:href="#a"/>
+        <use class="braid-loop" xlink:href="#b"/>
+        <use class="braid-loop" transform="rotate(90 50 50)" xlink:href="#b"/>
+    </g>
+</svg>
