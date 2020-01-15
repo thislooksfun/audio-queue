@@ -13,7 +13,7 @@ import bodyParser from "body-parser";
 import methodOverride from "method-override";
 import log from "tlf-log";
 // Local
-import queue, { AudioTrack } from "../player/queue";
+import queue from "../player/queue";
 import plugins from "../plugins";
 
 const app = express();
