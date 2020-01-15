@@ -147,18 +147,28 @@ function playpause() {
     .finally(() => updateLock--);
 }
 
-function shiftUp(index: number) {
-  if (index <= 0 || index >= queue.length) {
-    throw new Error("Out of bounds!");
-  }
-  swap(queue, index, index - 1);
-}
+function shift(oldIndex: number, newIndex: number) {
+  // Bounds checking
+  if (oldIndex == newIndex) return;
+  if (oldIndex < 0 || oldIndex > queue.length - 1) return;
+  if (newIndex < 0 || newIndex > queue.length - 1) return;
 
-function shiftDown(index: number) {
-  if (index < 0 || index >= queue.length - 1) {
-    throw new Error("Out of bounds!");
+  // updateLock is not needed because this is synchronous
+
+  if (oldIndex < newIndex) {
+    for (var i = oldIndex; i < newIndex; i++) {
+      swap(queue, i, i + 1);
+    }
+  } else {
+    for (var i = oldIndex; i > newIndex; i--) {
+      swap(queue, i, i - 1);
+    }
   }
-  swap(queue, index, index + 1);
+
+  server.broadcast(
+    "queue",
+    queue.map(s => s.track)
+  );
 }
 
 function remove(index: number) {
@@ -209,8 +219,7 @@ export default {
 
   playpause,
 
-  shiftUp,
-  shiftDown,
+  shift,
   remove,
 
   // Wrappers for displaying queue and history
