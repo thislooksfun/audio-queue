@@ -3,6 +3,7 @@ import Promise from "bluebird";
 import log from "tlf-log";
 // Local
 import swap from "../util/swap";
+import server from "../web/server";
 
 export interface AudioStatus {
   playing: boolean;
@@ -44,9 +45,14 @@ function start() {
   }
   log.info("Starting audio source...");
   updateLock++;
-  return nowPlaying
+  let np = nowPlaying!;
+  return np
     .start()
     .tap(() => log.info("Audio source started successfully"))
+    .then(() => server.broadcast("track", np.track))
+    .then(() => np.status())
+    .then(status => server.broadcast("status", status))
+    .return()
     .finally(() => updateLock--);
 }
 
@@ -55,12 +61,20 @@ function enqueue(as: AudioSource): Promise<void> {
   log.info(`Queueing track ${name} by ${artist} from ${source}`);
   queue.push(as);
   // If the queue was empty before, start it playing automatically.
-  return Promise.resolve().then(() => {
-    if (!autoplay) return;
-    if (queue.length > 1) return;
-    if (nowPlaying != undefined) return;
-    return next();
-  });
+  return Promise.resolve()
+    .then(() => {
+      if (!autoplay) return;
+      if (queue.length > 1) return;
+      if (nowPlaying != undefined) return;
+      return next();
+    })
+    .then(() =>
+      server.broadcast(
+        "queue",
+        queue.map(s => s.track)
+      )
+    )
+    .return();
 }
 
 function next() {
@@ -115,6 +129,9 @@ function playpause() {
   return Promise.resolve()
     .then(() => np.status())
     .then(({ playing }) => (playing ? np.pause() : np.resume()))
+    .then(() => np.status())
+    .then(status => server.broadcast("status", status))
+    .return()
     .finally(() => updateLock--);
 }
 
@@ -149,7 +166,7 @@ function checkState() {
 
   log.trace_(`Checking status of ${nowPlaying.track.name}: `);
 
-  nowPlaying
+  return nowPlaying
     .status()
     .tap(s =>
       log.trace(
@@ -158,6 +175,7 @@ function checkState() {
         }; ${s.finished ? "finished" : "not finished"})`
       )
     )
+    .tap(status => server.broadcast("status", status))
     .tapCatch(() => log.trace())
     .then(s => {
       // TODO: Preload next source?
