@@ -4,6 +4,7 @@ import log from "tlf-log";
 // Local
 import swap from "../util/swap";
 import server from "../web/server";
+import plugins from "../plugins";
 
 export interface AudioStatus {
   playing: boolean;
@@ -75,6 +76,17 @@ function enqueueSource(as: AudioSource): Promise<void> {
       )
     )
     .return();
+}
+
+function enqueueTrack(at: AudioTrack): Promise<void> {
+  const plugin = plugins[at.source];
+  if (plugin == null) return Promise.resolve();
+
+  log.trace(`Enqueuing ${at.name} via ${plugin.name}`);
+
+  return Promise.resolve()
+    .then(() => plugin.createAudioSource(at))
+    .then(as => enqueueSource(as));
 }
 
 function next() {
@@ -189,6 +201,8 @@ function checkState() {
 
 export default {
   enqueueSource,
+  enqueueTrack,
+
   next,
   preloadNext,
   previous,
