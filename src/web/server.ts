@@ -4,9 +4,11 @@
 // import path from "path";
 // import fs from "fs";
 import { execSync } from "child_process";
+import httpServer from "http";
 // 3rd-party
 import Promise from "bluebird";
 import express, { Request, Response } from "express";
+import socketIO from "socket.io";
 import bodyParser from "body-parser";
 import methodOverride from "method-override";
 import log from "tlf-log";
@@ -15,6 +17,8 @@ import queue, { AudioTrack } from "../player/queue";
 import plugins from "../plugins";
 
 const app = express();
+const http = httpServer.createServer(app);
+const io = socketIO(http);
 const port = parseInt(process.argv[2]) || 8080;
 
 function methodOverrideBody(req: Request, _res: Response) {
@@ -236,6 +240,6 @@ export default {
     app.use("/api/v1", apiv1Router);
     //#endregion API v1 routes
 
-    app.listen(port, () => log.info(`App listening on port ${port}!`));
+    http.listen(port, () => log.info(`App listening on port ${port}!`));
   },
 };
