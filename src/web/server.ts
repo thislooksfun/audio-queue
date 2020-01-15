@@ -14,6 +14,8 @@ import log from "tlf-log";
 // Local
 import queue from "../player/queue";
 import plugins from "../plugins";
+import setVolume from "../util/volume";
+import search from "../util/search";
 
 const app = express();
 const http = httpServer.createServer(app);
@@ -49,21 +51,21 @@ function apiWrap<T>(
   );
 }
 
-// function getAuthenticationStatuses() {
-//   return Promise.resolve()
-//     .then(() => Object.values(plugins))
-//     .filter(({ isAuthenticated }) => isAuthenticated != null)
-//     .map(plugin =>
-//       // @ts-ignore
-//       Promise.all([plugin.name, plugin.isAuthenticated()])
-//     )
-//     .then(entries =>
-//       entries.reduce((o: { [key: string]: boolean }, [n, a]) => {
-//         o[n] = a;
-//         return o;
-//       }, {})
-//     );
-// }
+function getAuthenticationStatuses() {
+  return Promise.resolve()
+    .then(() => Object.values(plugins))
+    .filter(({ isAuthenticated }) => isAuthenticated != null)
+    .map(plugin =>
+      // @ts-ignore
+      Promise.all([plugin.name, plugin.isAuthenticated()])
+    )
+    .then(entries =>
+      entries.reduce((o: { [key: string]: boolean }, [n, a]) => {
+        o[n] = a;
+        return o;
+      }, {})
+    );
+}
 
 export default {
   broadcast: io.emit.bind(io),
@@ -122,6 +124,29 @@ export default {
 
     app.use("/api/v1", apiv1Router);
     //#endregion API v1 routes
+
+    //#region Sockets
+    io.on("connection", socket => {
+      console.log("a user connected");
+
+      console.log("> sending track and status");
+      socket.emit("track", queue.current);
+      queue.status().then(s => socket.emit("status", s));
+      getAuthenticationStatuses().then(a => socket.emit("authentications", a));
+
+      socket.on("disconnect", () => console.log("user disconnected"));
+      socket.on("test", (x: any) => console.log("Test", x));
+
+      socket.on("playpause", queue.playpause);
+      socket.on("volume", setVolume);
+      socket.on("enqueue", queue.enqueueTrack);
+      socket.on("queue.shift", queue.shift);
+      socket.on("queue.next", queue.next);
+      socket.on("queue.prev", queue.previous);
+      socket.on("queue.remove", queue.remove);
+      socket.on("search", search);
+    });
+    //#endregion
 
     http.listen(port, () => log.info(`App listening on port ${port}!`));
   },
