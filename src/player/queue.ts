@@ -56,7 +56,7 @@ function start() {
     .finally(() => updateLock--);
 }
 
-function enqueue(as: AudioSource): Promise<void> {
+function enqueueSource(as: AudioSource): Promise<void> {
   const { name, artist, source } = as.track;
   log.info(`Queueing track ${name} by ${artist} from ${source}`);
   queue.push(as);
@@ -188,7 +188,7 @@ function checkState() {
 }
 
 export default {
-  enqueue,
+  enqueueSource,
   next,
   preloadNext,
   previous,
