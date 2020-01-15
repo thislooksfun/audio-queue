@@ -2,18 +2,21 @@
   <div id="app">
     <ConnectionStatus />
     <AuthenticationStatus />
+    <Search />
   </div>
 </template>
 
 <script>
 import ConnectionStatus from "./components/ConnectionStatus";
 import AuthenticationStatus from "./components/AuthenticationStatus";
+import Search from "./components/Search";
 
 export default {
   name: "app",
   components: {
     ConnectionStatus,
     AuthenticationStatus,
+    Search,
   },
 };
 </script>
