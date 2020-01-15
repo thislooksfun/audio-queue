@@ -8,34 +8,6 @@ export function registerPages(router: Router) {
   router.get("/auth", (_req, res) => {
     res.redirect(connect.authorizeURL);
   });
-
-  router.get("/play", (_req, res) => {
-    connect
-      .play()
-      .then(() => res.send("Playing!"))
-      .catch({ message: "Not Authenticated" }, () =>
-        res.send("Not Authenticated!")
-      )
-      .catch(() => {
-        log.error("Error while tring to play from Spotify:");
-        // console.log(e);
-        res.status(500).send("Something went wrong.");
-      });
-  });
-
-  router.get("/pause", (_req, res) => {
-    connect
-      .pause()
-      .then(() => res.send("Paused!"))
-      .catch({ message: "Not Authenticated" }, () =>
-        res.send("Not Authenticated!")
-      )
-      .catch(e => {
-        log.error("Error while tring to pause Spotify:");
-        console.log(e);
-        res.status(500).send("Something went wrong.");
-      });
-  });
 }
 
 export function registerAPI(router: Router) {
