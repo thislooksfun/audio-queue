@@ -82,20 +82,7 @@ export default {
     app.use(methodOverride(methodOverrideBody));
 
     //#region Global routes
-    app.get("/", (_req, res) => {
-      res.sendFile("frontend/dist/index.html");
-
-      // return Promise.resolve()
-      //   .then(getAuthenticationStatuses)
-      //   .then(authenticated =>
-      //     res.render("home", {
-      //       queue: queue.queue,
-      //       history: queue.history.slice(-5),
-      //       current: queue.current,
-      //       authenticated,
-      //     })
-      //   );
-    });
+    app.get("/", (_req, res) => res.sendFile("frontend/dist/index.html"));
     //#endregion Global routes
 
     const apiv1Router = express.Router();
