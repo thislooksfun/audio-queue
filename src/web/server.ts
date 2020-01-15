@@ -96,47 +96,6 @@ export default {
       //     })
       //   );
     });
-
-    // app.get("/history", (_req, res) => {
-    //   return Promise.resolve().then(() =>
-    //     res.render("history", {
-    //       history: queue.history,
-    //       current: queue.current,
-    //     })
-    //   );
-    // });
-
-    // app.get("/search", (req, res) => {
-    //   const q = req.query.q || "";
-
-    //   if (q == "") {
-    //     return res.status(400).send("Bad Request");
-    //   }
-
-    //   return Promise.resolve()
-    //     .then(() => Object.values(plugins))
-    //     .map(p => p.searchFor(q).then(r => ({ name: p.name, results: r })))
-    //     .all()
-    //     .filter(r => r.results != null)
-    //     .then(a => <{ name: string; results: AudioTrack[] }[]>a)
-    //     .then(arr =>
-    //       arr.reduce((o: { [key: string]: AudioTrack[] }, t) => {
-    //         o[t.name] = o[t.name] || [];
-    //         o[t.name].push(...t.results);
-    //         return o;
-    //       }, {})
-    //     )
-    //     .then(results =>
-    //       res.render("search", {
-    //         current: queue.current,
-    //         results,
-    //       })
-    //     )
-    //     .catch(e => {
-    //       console.log(e);
-    //       res.status(500).send("Something went wrong!");
-    //     });
-    // });
     //#endregion Global routes
 
     const apiv1Router = express.Router();
@@ -164,49 +123,6 @@ export default {
       res.send("Pong!");
     });
 
-    apiv1Router.put("/volume", (req, res) => {
-      const volume = parseFloat(req.body.percent);
-      if (isNaN(volume)) {
-        res.status(400).send("Invalid volume level");
-      }
-
-      return apiWrap(res, `setting volume to ${volume}`, () =>
-        execSync(`amixer sset PCM,0 ${volume}% > /dev/null &`)
-      );
-    });
-
-    apiv1Router.put("/queue/next", (_req, res) => {
-      log.trace("Moving to next track");
-      return apiWrap(res, "moving to the next track", () => queue.next());
-    });
-
-    apiv1Router.put("/queue/playpause", (_req, res) => {
-      log.trace("Play / pause");
-      return apiWrap(res, "playing/pausing", () => queue.playpause());
-    });
-
-    apiv1Router.put("/queue/previous", (_req, res) => {
-      log.trace("Moving to previous track");
-      return apiWrap(res, "moving to the previous track", () =>
-        queue.previous()
-      );
-    });
-
-    apiv1Router.put("/queue/shift", (req, res) => {
-      if (typeof req.body !== "object") {
-        return res.status(400).send("Invalid Request");
-      }
-
-      log.trace(`Shifting ${req.body.index} ${req.body.direction}`);
-
-      const up = queue.shiftUp.bind(queue);
-      const down = queue.shiftDown.bind(queue);
-      const shift = req.body.direction == "up" ? up : down;
-
-      const action = `shifting ${req.body.index} ${req.body.direction}`;
-      return apiWrap(res, action, () => shift(parseInt(req.body.index)));
-    });
-
     apiv1Router.put("/queue/remove", (req, res) => {
       if (typeof req.body !== "object") {
         return res.status(400).send("Invalid Request");
@@ -216,27 +132,6 @@ export default {
 
       const action = `removing item at index ${req.body.index}`;
       return apiWrap(res, action, () => queue.remove(parseInt(req.body.index)));
-    });
-
-    apiv1Router.post("/enqueue", (req, res) => {
-      if (typeof req.body !== "object") {
-        return res.status(400).send("Invalid Request");
-      }
-
-      const plugin = plugins[req.body.service];
-      if (plugin == null) {
-        return res.status(400).send("Invalid Request");
-      }
-
-      const track = <AudioTrack>JSON.parse(req.body.track);
-
-      log.trace(`Enqueuing ${track.name} via ${plugin.name}`);
-
-      return apiWrap(res, `enqueuing ${track.name} via ${plugin.name}`, () => {
-        return Promise.resolve()
-          .then(() => plugin.createAudioSource(track))
-          .then(as => queue.enqueue(as));
-      });
     });
 
     app.use("/api/v1", apiv1Router);
