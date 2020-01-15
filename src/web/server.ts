@@ -151,3 +151,20 @@ export default {
     http.listen(port, () => log.info(`App listening on port ${port}!`));
   },
 };
+
+// === Events ===
+// Server events:
+//   track(AudioTrack)          - broadcast on track changes
+//   status(AudioStatus)        - broadcast on status change
+//   volume(number)             - broadcast on volume change
+//   queue(AudioTrack[])        - broadcast on queue change
+//
+// Client events:
+//   playpause()                 - play/pause the track
+//   volume(number)              - set the volume (number is clamped to 0-100)
+//   enqueue(AudioTrack)         - add a track to the end of the queue
+//   queue.shift(number, number) - move a track in the queue (old, new)
+//   queue.next()                - switch to the next track in the queue
+//   queue.prev()                - switch to the last track in the history
+//   queue.remove(number)        - remove the item in the queue at the given index
+//   search(String)              - search for a given string
