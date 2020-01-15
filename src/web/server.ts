@@ -67,6 +67,8 @@ function apiWrap<T>(
 // }
 
 export default {
+  broadcast: io.emit.bind(io),
+
   start() {
     app.use(express.static("frontend/dist"));
 
