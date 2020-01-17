@@ -134,6 +134,8 @@ export default {
       console.log("> sending track and status");
       socket.emit("track", queue.current);
       queue.status().then(s => socket.emit("status", s));
+      socket.emit("queue", queue.queue);
+      socket.emit("history", queue.history);
       getAuthenticationStatuses().then(a => socket.emit("authentications", a));
 
       socket.on("disconnect", () => console.log("user disconnected"));
