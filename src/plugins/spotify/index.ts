@@ -8,6 +8,7 @@ import { registerPages, registerAPI } from "./router";
 import log from "tlf-log";
 import connect, { isAuthenticated } from "./connect";
 import player from "./player";
+import server from "../../web/server";
 
 //#region Interfaces
 export interface SpotifyStatus extends AudioStatus {
@@ -34,42 +35,31 @@ function isSpotifyAudioTrack(at: AudioTrack): at is SpotifyAudioTrack {
 //#endregion Type guards
 
 //#region Helper functions
+function handleError(action: string, e: any) {
+  log.error(`An error occurred while ${action}`, e);
+  server.checkAuth();
+}
+
 function createAudioSource(track: SpotifyAudioTrack): SpotifyAudioSource {
   return {
     track,
 
-    loaded() {
-      log.fatal("SpotifyAudioSource.loaded: Not implemented");
-      return Promise.reject("Not implemented");
-    },
-    preload() {
-      log.fatal("SpotifyAudioSource.preload: Not implemented");
-      return Promise.reject("Not implemented");
-    },
-    status(): Promise<SpotifyStatus> {
-      return (
-        player
-          .getStatus()
-          .tap(s => (track.data.started = track.data.started || s.time > 0))
-          // When the track is finished it automatically pauses and sets the
-          // time to 0
-          .tap(
-            s => (s.finished = track.data.started && s.time == 0 && !s.playing)
-          )
-      );
-    },
-    pause() {
-      return connect.pause();
-    },
-    resume() {
-      return connect.play();
-    },
-    start() {
-      return connect.play(track.data.uri);
-    },
-    stop() {
-      return connect.pause();
-    },
+    loaded: () => log.fatal("SpotifyAudioSource.loaded: Not implemented"),
+    preload: () => log.fatal("SpotifyAudioSource.preload: Not implemented"),
+    status: () =>
+      player
+        .getStatus()
+        .tap(s => (track.data.started = track.data.started || s.time > 0))
+        // When the track is finished it automatically pauses and sets the
+        // time to 0
+        .tap(
+          s => (s.finished = track.data.started && s.time == 0 && !s.playing)
+        ),
+    pause: () => connect.pause().catch(handleError.bind(null, "pausing")),
+    resume: () => connect.play().catch(handleError.bind(null, "resuming")),
+    start: () =>
+      connect.play(track.data.uri).catch(handleError.bind(null, "starting")),
+    stop: () => connect.pause().catch(handleError.bind(null, "stopping")),
   };
 }
 //#endregion Helper functions

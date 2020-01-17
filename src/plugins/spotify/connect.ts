@@ -13,6 +13,7 @@ import { SpotifyAudioTrack } from ".";
 import scopes from "./scopes";
 import player from "./player";
 import sleep from "../../util/sleep";
+import server from "../../web/server";
 
 type TrackPage = SpotifyApi.PagingObject<SpotifyApi.TrackObjectFull>;
 
@@ -92,6 +93,10 @@ function transferPlayback() {
       // Sleep for half a second to ensure that the device has changed.
       .then(() => sleep(500))
       .tap(() => console.log("Transferred playback"))
+      .catch(e => {
+        log.error("Something went wrong while trying to transfer playback", e);
+        server.checkAuth();
+      })
   );
 }
 
