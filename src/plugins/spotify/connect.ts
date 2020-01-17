@@ -87,12 +87,12 @@ function transferPlayback() {
   return (
     player
       .getDeviceID()
-      .tap(id => console.log(`Transferring playback to ${id}`))
+      .tap(id => log.trace(`Transferring playback to ${id}`))
       // @ts-ignore
       .then(id => spotify.transferMyPlayback({ deviceIds: [id] }))
       // Sleep for half a second to ensure that the device has changed.
       .then(() => sleep(500))
-      .tap(() => console.log("Transferred playback"))
+      .tap(() => log.info("Transferred spotify playback"))
       .catch(e => {
         log.error("Something went wrong while trying to transfer playback", e);
         server.checkAuth();
