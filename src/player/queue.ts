@@ -212,12 +212,10 @@ function checkState() {
 }
 
 function status(): Promise<AudioStatus | null> {
-  if (nowPlaying == null) {
-    return Promise.resolve(null);
-  }
-
   updateLock++;
-  return nowPlaying.status();
+  return Promise.resolve(nowPlaying)
+    .then(np => (np == null ? null : np.status()))
+    .finally(() => updateLock--);
 }
 
 export default {
