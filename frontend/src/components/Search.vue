@@ -1,5 +1,5 @@
 <template>
-  <div class="search-bar" @click="focus" v-click-outside="unfocus">
+  <div class="search-bar" @focusin="focus" v-click-outside="unfocus">
     <div class="logo">
       <img
         class="braid-logo"
@@ -18,8 +18,6 @@
             type="text"
             class="search"
             placeholder="Search"
-            @focus="focus"
-            @blur="unfocus"
           />
           <span class="search-icon fas fa-search"></span>
         </form>
@@ -71,6 +69,11 @@ export default {
       // this.results = r;
       this.lastSearchIndex = i;
     },
+    onkey(e) {
+      if (e.keyCode == 27) {
+        this.unfocus();
+      }
+    },
     focus() {
       this.focused = true;
     },
@@ -80,8 +83,15 @@ export default {
   },
   watch: {
     query() {
+      this.focus();
       this.search();
     },
+  },
+  created() {
+    window.addEventListener("keydown", this.onkey);
+  },
+  beforeDestroy() {
+    window.removeEventListener("keydown", this.onkey);
   },
 };
 </script>
