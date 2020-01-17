@@ -69,6 +69,8 @@ function getAuthenticationStatuses() {
 
 export default {
   broadcast: io.emit.bind(io),
+  checkAuth: () =>
+    getAuthenticationStatuses().then(a => io.emit("authentications", a)),
 
   start() {
     app.use(express.static("frontend/dist"));
