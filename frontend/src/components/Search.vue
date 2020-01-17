@@ -26,7 +26,7 @@
       </div>
     </div>
 
-    <search-results v-show="focused" :results="results" />
+    <search-results v-show="focused && results.length > 0" :results="results" />
   </div>
 </template>
 
