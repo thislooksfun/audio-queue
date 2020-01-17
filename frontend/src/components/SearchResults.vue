@@ -35,7 +35,7 @@ export default {
 <style lang="less" scoped>
 .search-results {
   @width: 30vw;
-  position: fixed;
+  position: absolute;
   top: 4rem;
   left: calc((100vw - @width) / 2);
   width: @width;
