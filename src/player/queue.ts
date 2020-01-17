@@ -42,6 +42,8 @@ const autoplay = true;
 function start() {
   if (nowPlaying == null) {
     log.info("Went to start source, but no source was found.");
+    server.broadcast("track", null);
+    server.broadcast("status", null);
     return Promise.resolve();
   }
   log.info("Starting audio source...");
