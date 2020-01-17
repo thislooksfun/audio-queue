@@ -154,10 +154,12 @@ export default {
 
 // === Events ===
 // Server events:
-//   track(AudioTrack)          - broadcast on track changes
-//   status(AudioStatus)        - broadcast on status change
-//   volume(number)             - broadcast on volume change
-//   queue(AudioTrack[])        - broadcast on queue change
+//   authentications: {[key: string]: boolean} - broadcast on connect and authentication status change
+//   track: AudioTrack | null                  - broadcast on connect and track changes
+//   status: AudioStatus | null                - broadcast on connect and status change
+//   volume: number                            - broadcast on connect and volume change
+//   queue: AudioTrack[]                       - broadcast on connect and queue change
+//   history: AudioTrack[]                     - broadcast on connect and history change
 //
 // Client events:
 //   playpause()                 - play/pause the track
