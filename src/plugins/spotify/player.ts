@@ -46,6 +46,19 @@ export default {
       .then(el => el.getText());
   },
 
+  setExpectedURI(id: string) {
+    if (!driver) {
+      return Promise.reject(new Error("No driver"));
+    }
+
+    let d: Driver = driver;
+    // Get the device ID
+    return Promise.resolve()
+      .then(() => d.findElement(By.id("expectedURI")))
+      .tap(e => e.clear())
+      .tap(e => e.sendKeys(id));
+  },
+
   getStatus() {
     if (!driver) {
       return Promise.reject(new Error("No driver"));

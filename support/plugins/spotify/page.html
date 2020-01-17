@@ -7,6 +7,8 @@
     <title>Spotify Web Player (loading)</title>
   </head>
   <body>
+    <input type="text" id="expectedURI" />
+
     <span id="device_id"></span>
     <span id="device_state">loading</span>
 
@@ -48,6 +50,12 @@
           const track = state.track_window.current_track;
 
           if (!state.paused) {
+            if (track.uri != expectedURI.value) {
+              console.log(
+                `MISMATCHED TRACKS -- Expected ${expectedURI.value}, got ${track.id}`
+              );
+              player.pause().then(() => player.seek(0));
+            }
             document.getElementById("device_state").innerText = "playing";
           } else {
             document.getElementById("device_state").innerText = "paused";
