@@ -12,7 +12,7 @@
     "core-js": "^3.4.4",
     "v-click-outside": "^3.0.0",
     "vue": "^2.6.10",
-    "vue-socket.io": "git+https://github.com/PhantasWeng/Vue-Socket.io.git#cef2ca40992500b7ae5dd3917268167446cc509c"
+    "vue-socket.io": "^3.0.7"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.1.0",

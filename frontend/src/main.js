@@ -9,7 +9,6 @@ Vue.use(vClickOutside);
 Vue.use(
   new VueSocketIO({
     debug: true,
-    darkMode: true,
     connection: io(), // eslint-disable-line no-undef
   })
 );
