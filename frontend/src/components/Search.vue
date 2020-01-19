@@ -45,20 +45,14 @@ export default {
   methods: {
     search() {
       if (this.query == "") {
-        // eslint-disable-next-line no-console
-        console.log(`Clearing search`);
         this.results = [];
       } else {
-        // eslint-disable-next-line no-console
-        console.log(`Searching for ${this.query}`);
         const i = this.searchIndex++;
         this.$socket.emit("search", this.query, i, this.searchResults);
       }
     },
     searchResults(r, i) {
       if (i < this.lastSearchIndex) return;
-      // eslint-disable-next-line no-console
-      console.log(`Got search results:`, r);
       this.results = [
         ...r,
         {
