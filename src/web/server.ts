@@ -138,8 +138,8 @@ export default {
       socket.emit("history", queue.history);
       getAuthenticationStatuses().then(a => socket.emit("authentications", a));
 
-      socket.on("disconnect", () => console.log("user disconnected"));
-
+      // Handle client events
+      socket.on("disconnect", () => log.info("A user disconnected"));
       socket.on("playpause", queue.playpause);
       socket.on("volume", setVolume);
       socket.on("enqueue", queue.enqueueTrack);
