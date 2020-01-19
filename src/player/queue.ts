@@ -47,7 +47,11 @@ function start() {
     server.broadcast("status", null);
     return Promise.resolve();
   }
+
   log.info("Starting audio source...");
+
+  server.broadcast("loading");
+
   updateLock++;
   let np = nowPlaying!;
   return np
@@ -138,6 +142,8 @@ function playpause() {
   if (nowPlaying == null) {
     return Promise.resolve();
   }
+
+  server.broadcast("loading");
 
   updateLock++;
   const np: AudioSource = nowPlaying;

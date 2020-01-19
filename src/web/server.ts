@@ -164,6 +164,7 @@ export default {
 //   volume: number                            - broadcast on connect and volume change
 //   queue: AudioTrack[]                       - broadcast on connect and queue change
 //   history: AudioTrack[]                     - broadcast on connect and history change
+//   loading                                   - broadcast on track load events (starting, playing, pausing, etc.)
 //
 // Client events:
 //   playpause()                 - play/pause the track
