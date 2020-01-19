@@ -186,11 +186,7 @@ export default {
     return ensureAuthenticated()
       .then(ensurePlayer)
       .tap(() => log.debug(`spotify.play(${uri})`))
-      .then(() => {
-        if (uri) {
-          player.setExpectedURI(uri);
-        }
-      })
+      .then(() => (uri ? player.setExpectedURI(uri) : null))
       .then(() => (uri ? [uri] : undefined))
       .then(uris => spotify.play({ uris }))
       .then(() => player.waitForPlayback(uri))
