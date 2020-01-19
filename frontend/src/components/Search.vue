@@ -99,6 +99,8 @@ export default {
   background-color: #712f79;
   color: #fff;
 
+  z-index: 99;
+
   .logo {
     position: absolute;
     left: 1.5rem;
