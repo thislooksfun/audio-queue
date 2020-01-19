@@ -151,7 +151,7 @@ export default {
 
   get authorizeURL() {
     authState = uuidv4();
-    return spotify.createAuthorizeURL(scopes, authState);
+    return spotify.createAuthorizeURL(scopes, authState, true);
   },
   getTokenFromCode(code: string, state: string) {
     // Ensure the state is valid
