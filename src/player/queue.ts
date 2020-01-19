@@ -216,13 +216,15 @@ function checkState() {
   if (updateLock > 0) return;
   updateLock++;
 
-  log.trace_(`Checking status of ${nowPlaying.track.name}: `);
+  const {
+    track: { name },
+  } = nowPlaying;
 
   return nowPlaying
     .status()
     .tap(s =>
       log.trace(
-        `${s.time.toFixed(2)}/${s.duration.toFixed(2)} (${
+        `Status of ${name}: ${s.time.toFixed(2)}/${s.duration.toFixed(2)} (${
           s.playing ? "playing" : "paused"
         }; ${s.finished ? "finished" : "not finished"})`
       )
