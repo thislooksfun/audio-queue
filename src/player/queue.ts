@@ -40,6 +40,35 @@ let nowPlaying: AudioSource | undefined;
 
 const autoplay = true;
 
+const trackQueue = () => queue.map(s => s.track);
+const trackHistory = () => history.map(s => s.track);
+
+function shiftQueue() {
+  const q = queue.shift();
+  server.broadcast("queue", trackQueue());
+  return q;
+}
+
+function pushQueue(s: AudioSource, front: boolean = false) {
+  if (front) {
+    queue.unshift(s);
+  } else {
+    queue.push(s);
+  }
+  server.broadcast("queue", trackQueue());
+}
+
+function popHistory() {
+  const h = history.pop();
+  server.broadcast("history", trackHistory());
+  return h;
+}
+
+function pushHistory(s: AudioSource) {
+  history.push(s);
+  server.broadcast("history", trackHistory());
+}
+
 function start() {
   if (nowPlaying == null) {
     log.info("Went to start source, but no source was found.");
@@ -67,7 +96,7 @@ function start() {
 function enqueueSource(as: AudioSource): Promise<void> {
   const { name, artist, source } = as.track;
   log.info(`Queueing track ${name} by ${artist} from ${source}`);
-  queue.push(as);
+  pushQueue(as);
   // If the queue was empty before, start it playing automatically.
   return Promise.resolve()
     .then(() => {
@@ -76,12 +105,6 @@ function enqueueSource(as: AudioSource): Promise<void> {
       if (nowPlaying != undefined) return;
       return next();
     })
-    .then(() =>
-      server.broadcast(
-        "queue",
-        queue.map(s => s.track)
-      )
-    )
     .return();
 }
 
@@ -104,10 +127,10 @@ function next() {
       if (!nowPlaying) return;
 
       log.trace("Audio currently playing, stopping that first...");
-      history.push(nowPlaying);
+      pushHistory(nowPlaying);
       return nowPlaying.stop();
     })
-    .then(() => (nowPlaying = queue.shift()))
+    .then(() => (nowPlaying = shiftQueue()))
     .then(start)
     .finally(() => updateLock--);
 }
@@ -130,10 +153,10 @@ function previous() {
       if (!nowPlaying) return;
 
       log.trace("Audio currently playing, stopping that first...");
-      queue.unshift(nowPlaying);
+      pushQueue(nowPlaying, true);
       return nowPlaying.stop();
     })
-    .then(() => (nowPlaying = history.pop()))
+    .then(() => (nowPlaying = popHistory()))
     .then(start)
     .finally(() => updateLock--);
 }
@@ -174,10 +197,7 @@ function shift(oldIndex: number, newIndex: number) {
     }
   }
 
-  server.broadcast(
-    "queue",
-    queue.map(s => s.track)
-  );
+  server.broadcast("queue", trackQueue());
 }
 
 function remove(index: number) {
@@ -185,6 +205,7 @@ function remove(index: number) {
     throw new Error("Out of bounds!");
   }
   queue.splice(index, 1);
+  server.broadcast("queue", trackQueue());
 }
 
 let updateLock = 0;
@@ -245,10 +266,10 @@ export default {
     return nowPlaying ? nowPlaying.track : undefined;
   },
   get queue() {
-    return queue.map(s => s.track);
+    return trackQueue();
   },
   get history() {
-    return history.map(s => s.track);
+    return trackHistory();
   },
 };
 
