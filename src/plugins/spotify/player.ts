@@ -4,6 +4,7 @@ import path from "path";
 import Promise from "bluebird";
 import { until, By } from "selenium-webdriver";
 import { Driver } from "selenium-webdriver/firefox";
+import log from "tlf-log";
 // Local
 import navigateTo, { createDriverSession } from "../../util/webdriver";
 import { SpotifyStatus } from ".";
@@ -102,7 +103,9 @@ export default {
     let d: Driver = driver;
     return Promise.resolve()
       .then(() => d.findElement(By.id("track_uri")))
+      .tap(() => log.debug("Waiting for playback to start..."))
       .then(el => d.wait(until.elementTextIs(el, uri)))
+      .tap(() => log.debug("Playback started"))
       .return();
   },
 
