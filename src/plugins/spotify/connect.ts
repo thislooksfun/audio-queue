@@ -94,7 +94,7 @@ function transferPlayback() {
       .getDeviceID()
       .tap(id => log.trace(`Transferring playback to ${id}`))
       // @ts-ignore
-      .then(id => spotify.transferMyPlayback({ deviceIds: [id] }))
+      .then(id => spotify.transferMyPlayback({ deviceIds: [id], play: false }))
       // Sleep for half a second to ensure that the device has changed.
       .then(() => sleep(500))
       .tap(() => log.info("Transferred spotify playback"))
@@ -134,6 +134,7 @@ function ensurePlayer() {
       // No-op if the player is already open
       .catch({ message: "Already open" }, () => {})
       .then(() => transferPlayback())
+      .then(() => sleep(1000))
       .return()
   );
 }
