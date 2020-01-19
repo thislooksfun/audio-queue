@@ -17,6 +17,7 @@ export interface AudioTrack {
   source: string;
   name: string;
   artist: string;
+  artwork: string | null;
   data: any;
 }
 

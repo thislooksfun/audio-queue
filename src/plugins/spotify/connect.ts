@@ -133,6 +133,13 @@ function ensurePlayer() {
   );
 }
 
+function getAlbumArt(a: SpotifyApi.AlbumObjectSimplified): string | null {
+  const artworks = a.images.sort(
+    ({ width: a, width: b }) => (b || 0) - (a || 0)
+  );
+  return artworks.length > 0 ? artworks[0].url : null;
+}
+
 export default {
   isAuthenticated,
 
@@ -205,6 +212,7 @@ export default {
         source: "spotify",
         name: track.name,
         artist: track.artists.map(a => a.name).join(" & "),
+        artwork: getAlbumArt(track.album),
         data: {
           id: track.id,
           uri: track.uri,

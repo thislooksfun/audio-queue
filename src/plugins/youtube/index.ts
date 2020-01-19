@@ -250,6 +250,7 @@ const plugin: Plugin = {
         source: "youtube",
         name: `hello -- ${id}`,
         artist: "world",
+        artwork: null,
         data: { slug: id },
       },
     ]);
