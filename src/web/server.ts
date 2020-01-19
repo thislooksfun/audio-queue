@@ -166,11 +166,11 @@ export default {
 //   loading                                   - broadcast on track load events (starting, playing, pausing, etc.)
 //
 // Client events:
-//   playpause()                 - play/pause the track
-//   volume(number)              - set the volume (number is clamped to 0-100)
-//   enqueue(AudioTrack)         - add a track to the end of the queue
-//   queue.shift(number, number) - move a track in the queue (old, new)
-//   queue.next()                - switch to the next track in the queue
-//   queue.prev()                - switch to the last track in the history
-//   queue.remove(number)        - remove the item in the queue at the given index
-//   search(String)              - search for a given string
+//   playpause                   - play/pause the track
+//   volume: number              - set the volume (number is clamped to 0-100)
+//   enqueue: AudioTrack         - add a track to the end of the queue
+//   queue.shift: number, number - move a track in the queue (old, new)
+//   queue.next                  - switch to the next track in the queue
+//   queue.prev                  - switch to the last track in the history
+//   queue.remove: number        - remove the item in the queue at the given index
+//   search: string              - search for a given string
