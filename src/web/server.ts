@@ -139,7 +139,6 @@ export default {
       getAuthenticationStatuses().then(a => socket.emit("authentications", a));
 
       socket.on("disconnect", () => console.log("user disconnected"));
-      socket.on("test", (x: any) => console.log("Test", x));
 
       socket.on("playpause", queue.playpause);
       socket.on("volume", setVolume);
