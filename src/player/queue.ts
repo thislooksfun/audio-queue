@@ -69,6 +69,11 @@ function pushHistory(s: AudioSource) {
   server.broadcast("history", trackHistory());
 }
 
+function cleanStatus(s: AudioStatus | null) {
+  if (s == null) return null;
+  return { playing: s.playing, time: s.time, duration: s.duration };
+}
+
 function start() {
   if (nowPlaying == null) {
     log.info("Went to start source, but no source was found.");
@@ -87,7 +92,7 @@ function start() {
     .start()
     .tap(() => log.info("Audio source started successfully"))
     .then(() => server.broadcast("track", np.track))
-    .then(() => np.status())
+    .then(() => status())
     .then(status => server.broadcast("status", status))
     .return()
     .finally(() => updateLock--);
@@ -173,7 +178,7 @@ function playpause() {
   return Promise.resolve()
     .then(() => np.status())
     .then(({ playing }) => (playing ? np.pause() : np.resume()))
-    .then(() => np.status())
+    .then(() => status())
     .then(status => server.broadcast("status", status))
     .return()
     .finally(() => updateLock--);
@@ -229,7 +234,7 @@ function checkState() {
         }; ${s.finished ? "finished" : "not finished"})`
       )
     )
-    .tap(status => server.broadcast("status", status))
+    .tap(status => server.broadcast("status", cleanStatus(status)))
     .tapCatch(() => log.trace())
     .then(s => {
       // TODO: Preload next source?
@@ -245,6 +250,7 @@ function status() {
   updateLock++;
   return Promise.resolve(nowPlaying)
     .then(np => (np == null ? null : np.status()))
+    .then(cleanStatus)
     .finally(() => updateLock--);
 }
 
