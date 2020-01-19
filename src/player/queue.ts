@@ -239,7 +239,7 @@ function checkState() {
     .finally(() => updateLock--);
 }
 
-function status(): Promise<AudioStatus | null> {
+function status() {
   updateLock++;
   return Promise.resolve(nowPlaying)
     .then(np => (np == null ? null : np.status()))
