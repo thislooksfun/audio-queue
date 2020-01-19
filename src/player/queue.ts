@@ -201,7 +201,7 @@ function shift(oldIndex: number, newIndex: number) {
 }
 
 function remove(index: number) {
-  if (index < 0 || index >= queue.length - 1) {
+  if (index < 0 || index >= queue.length) {
     throw new Error("Out of bounds!");
   }
   queue.splice(index, 1);
