@@ -46,13 +46,25 @@
           console.error(message);
         });
 
+        let hasStarted = false;
+        let lastExpectedURI = null;
         const onState = state => {
           const track = state.track_window.current_track;
+          const expected = expectedURI.value;
+
+          if (expected != lastExpectedURI) {
+            hasStarted = false;
+            lastExpectedURI = expected;
+          }
 
           if (!state.paused) {
-            if (track.uri != expectedURI.value) {
+            if (!hasStarted && track.uri == expected) {
+              hasStarted = true;
+            }
+
+            if (hasStarted && track.uri != expectedURI.value) {
               console.log(
-                `MISMATCHED TRACKS -- Expected ${expectedURI.value}, got ${track.id}`
+                `MISMATCHED TRACKS -- Expected ${expectedURI.value}, got ${track.uri}`
               );
               player.pause().then(() => player.seek(0));
             }
