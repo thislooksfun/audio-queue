@@ -129,9 +129,9 @@ export default {
 
     //#region Sockets
     io.on("connection", socket => {
-      console.log("a user connected");
+      log.info("A user connected");
 
-      console.log("> sending track and status");
+      // Send current state to new connection
       socket.emit("track", queue.current);
       queue.status().then(s => socket.emit("status", s));
       socket.emit("queue", queue.queue);
