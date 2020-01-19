@@ -4,11 +4,27 @@
     <AuthenticationStatus />
     <Search />
 
-    <a @click="toggleHistory" href="#"
-      >Show {{ showHistory ? "queue" : "history" }}</a
-    >
-    <History v-show="showHistory" />
-    <Queue v-show="!showHistory" />
+    <div class="queue-hist-container">
+      <div class="queue-hist">
+        <div class="queue-hist-switch">
+          <a
+            :class="{ 'queue-select': true, selected: !showHistory }"
+            @click="showHistory = false"
+            href="#"
+            >Queue</a
+          >
+          <a
+            :class="{ 'hist-select': true, selected: showHistory }"
+            @click="showHistory = true"
+            href="#"
+            >History</a
+          >
+        </div>
+
+        <History v-show="showHistory" />
+        <Queue v-show="!showHistory" />
+      </div>
+    </div>
 
     <NowPlaying />
   </div>
@@ -41,13 +57,29 @@ export default {
 };
 </script>
 
-<style>
+<style lang="less">
+body {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
 #app {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-  margin-top: 60px;
+  color: #000;
+
+  --theme-color: #712f79;
 }
 
 .center {
@@ -56,5 +88,71 @@ export default {
 
 * {
   box-sizing: border-box;
+}
+
+button {
+  background: none;
+  border: none;
+  border-radius: 0;
+
+  font-size: 1rem;
+
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled) {
+    &:active,
+    &:hover {
+      color: var(--theme-color);
+    }
+  }
+}
+</style>
+
+<style lang="less" scoped>
+.queue-hist-container {
+  position: relative;
+  height: 100%;
+  width: 50vw;
+  margin: 0 auto;
+  padding: 4rem 0;
+
+  .queue-hist {
+    position: relative;
+    height: 100%;
+    overflow-y: scroll;
+
+    padding: 0.5rem;
+
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+
+    .queue-hist-switch {
+      width: 100%;
+      text-align: center;
+
+      margin-bottom: 0.5rem;
+
+      a {
+        text-decoration: none;
+        margin: 0 1rem;
+        color: #555;
+
+        font-size: 1.25rem;
+
+        &:hover {
+          color: #333;
+        }
+
+        &.selected {
+          color: #000;
+          border-bottom: 1px solid var(--theme-color);
+        }
+      }
+    }
+  }
 }
 </style>
