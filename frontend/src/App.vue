@@ -3,6 +3,8 @@
     <ConnectionStatus />
     <AuthenticationStatus />
     <Search />
+
+    <NowPlaying />
   </div>
 </template>
 
@@ -10,6 +12,7 @@
 import ConnectionStatus from "./components/ConnectionStatus";
 import AuthenticationStatus from "./components/AuthenticationStatus";
 import Search from "./components/Search";
+import NowPlaying from "./components/NowPlaying";
 
 export default {
   name: "app",
@@ -17,6 +20,7 @@ export default {
     ConnectionStatus,
     AuthenticationStatus,
     Search,
+    NowPlaying,
   },
 };
 </script>
