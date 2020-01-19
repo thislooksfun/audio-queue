@@ -4,6 +4,12 @@
     <AuthenticationStatus />
     <Search />
 
+    <a @click="toggleHistory" href="#"
+      >Show {{ showHistory ? "queue" : "history" }}</a
+    >
+    <History v-show="showHistory" />
+    <Queue v-show="!showHistory" />
+
     <NowPlaying />
   </div>
 </template>
@@ -12,6 +18,8 @@
 import ConnectionStatus from "./components/ConnectionStatus";
 import AuthenticationStatus from "./components/AuthenticationStatus";
 import Search from "./components/Search";
+import Queue from "./components/Queue";
+import History from "./components/History";
 import NowPlaying from "./components/NowPlaying";
 
 export default {
@@ -20,7 +28,15 @@ export default {
     ConnectionStatus,
     AuthenticationStatus,
     Search,
+    Queue,
+    History,
     NowPlaying,
+  },
+  data: () => ({ showHistory: false }),
+  methods: {
+    toggleHistory() {
+      this.showHistory = !this.showHistory;
+    },
   },
 };
 </script>
