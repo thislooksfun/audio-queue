@@ -40,14 +40,19 @@ function storeToken(refreshToken: string) {
   fs.writeFileSync(tokenPath, refreshToken);
 }
 
+let refreshTimeout: NodeJS.Timeout;
 function refreshAccessToken() {
   return Promise.resolve()
     .then(() => spotify.refreshAccessToken())
-    .then(({ body: { access_token } }) => {
+    .then(({ body: { access_token, expires_in } }) => {
       log.trace("Successfully refreshed the Spotify access token");
 
       // Save the access token so that it's used in future calls
       spotify.setAccessToken(access_token);
+
+      // Set a timer to refresh the token 30s before it expires
+      clearTimeout(refreshTimeout);
+      refreshTimeout = setTimeout(refreshAccessToken, (expires_in - 30) * 1000);
     });
 }
 
