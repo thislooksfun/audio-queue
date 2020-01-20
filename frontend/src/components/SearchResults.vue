@@ -1,5 +1,5 @@
 <template>
-  <div v-show="results.length > 0" class="search-results">
+  <div class="search-results">
     <ul>
       <template v-for="{ service, tracks } in results">
         <li class="seperator" :key="service.name"></li>
@@ -14,8 +14,13 @@
           <div class="album">
             <img :src="t.artwork" alt="" />
           </div>
-          <span class="name">{{ t.name }}</span> by
-          <span class="artist">{{ t.artist }}</span>
+
+          <div class="track-container">
+            <div class="track">
+              <span class="name">{{ t.name }}</span>
+              <span class="artist">{{ t.artist }}</span>
+            </div>
+          </div>
         </li>
       </template>
     </ul>
@@ -37,27 +42,33 @@ export default {
 
 <style lang="less" scoped>
 .search-results {
+  text-align: left;
+
   @width: 30vw;
   position: absolute;
   top: 4rem;
-  left: calc((100vw - @width) / 2);
-  width: @width;
+  left: 0;
+  width: 100%;
+  max-width: 35rem;
   background-color: var(--background-primary);
   color: var(--text-primary);
   border: 1px solid var(--background-secondary);
   border-top: 0;
   border-radius: 0 0 5px 5px;
 
+  // max-height: 50vh;
+  max-height: 80vh;
+  overflow-y: scroll;
+
   z-index: 99;
 
   ul {
     list-style-type: none;
     margin: 0;
-    padding: 0.5rem;
-    padding-top: 0.25rem;
+    padding: 0.25rem 0 0.25rem 0;
 
     li {
-      padding: 0.1rem 0;
+      padding: 0.1rem 0.5rem;
 
       &.seperator {
         height: 1px;
@@ -65,6 +76,8 @@ export default {
         padding: 0;
         background-color: #ccc;
 
+        padding-left: 0;
+        padding-right: 0;
         margin: 0.25rem 0;
 
         &:first-child {
@@ -75,9 +88,15 @@ export default {
 
       &.title {
         font-weight: 600;
+        line-height: 1em;
+        margin: 0.25rem 0;
       }
 
       &.result {
+        position: relative;
+        display: block;
+        width: 100%;
+
         cursor: pointer;
 
         &:hover {
@@ -87,13 +106,11 @@ export default {
         .album {
           position: relative;
           left: 0;
-          height: 2rem;
-          width: 2rem;
+          height: 3rem;
+          width: 3rem;
           display: inline-block;
 
           vertical-align: middle;
-
-          margin-right: 0.25rem;
 
           img {
             height: 100%;
@@ -102,15 +119,47 @@ export default {
           }
         }
 
-        .name {
-          color: #700;
-        }
-        .artist {
-          color: #070;
-        }
+        .track-container {
+          display: inline-block;
+          vertical-align: middle;
+          position: relative;
+          width: calc(100% - 3.25rem);
+          margin-left: 0.25rem;
 
-        &:hover {
-          background-color: #ccc;
+          .track {
+            position: relative;
+            width: 100%;
+
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+
+            display: grid;
+            grid-template-columns: auto;
+            grid-template-rows: auto auto;
+            grid-template-areas: "name" "artist";
+            row-gap: 0.5rem;
+
+            align-items: center;
+
+            .name,
+            .artist {
+              white-space: nowrap;
+              text-overflow: ellipsis;
+              overflow: hidden;
+            }
+
+            .name {
+              grid-area: name;
+              font-size: 1.1rem;
+              line-height: 1em;
+            }
+            .artist {
+              grid-area: artist;
+              font-size: 0.95rem;
+              line-height: 1em;
+            }
+          }
         }
       }
     }

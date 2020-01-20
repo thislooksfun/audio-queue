@@ -1,36 +1,40 @@
 <template>
   <div class="now-playing">
-    <div class="track">
-      <div class="album">
-        <img :src="artwork" alt="" />
-      </div>
+    <div class="album">
+      <img :src="artwork" alt="" />
+    </div>
 
-      <div class="info">
-        <div class="info-grid">
-          <span class="title">{{ trackname }}</span>
-          <span class="artist">{{ artist }}</span>
-        </div>
-      </div>
+    <div class="info">
+      <span class="title">{{ trackname }}</span>
+      <span class="artist">{{ artist }}</span>
     </div>
 
     <div class="controls">
-      <span class="fas fa-step-backward" @click="prev"></span>
-
-      <span v-if="loading">Loading...</span>
+      <span class="loading" v-if="loading">Loading...</span>
       <template v-else>
-        <span v-if="playing" class="fas fa-pause" @click="playpause"></span>
-        <span v-else class="fas fa-play" @click="playpause"></span>
-      </template>
+        <button @click="prev">
+          <span class="fas fa-step-backward"></span>
+        </button>
 
-      <span class="fas fa-step-forward" @click="next"></span>
+        <button @click="playpause">
+          <span v-if="playing" class="fas fa-pause"></span>
+          <span v-else class="fas fa-play"></span>
+        </button>
+
+        <button @click="next">
+          <span class="fas fa-step-forward"></span>
+        </button>
+      </template>
     </div>
 
-    <div class="progress">
-      <span class="time-elapsed" @click="toggleRemaining">{{ timeStr }}</span>
-      <div class="progress-bar">
-        <div class="progress-inner" :style="`width: ${progress * 100}%`"></div>
-      </div>
-      <span class="time-duration">{{ durationStr }}</span>
+    <span class="time"
+      >{{ timeStr }} /
+      <span @click="showRemaining = !showRemaining">{{
+        showRemaining ? remainingStr : durationStr
+      }}</span></span
+    >
+    <div class="progress-bar">
+      <div class="progress-inner" :style="`width: ${progress * 100}%`"></div>
     </div>
   </div>
 </template>
@@ -52,8 +56,8 @@ export default {
   data: () => ({
     track: null,
     status: null,
-    showRemaining: false,
     loading: false,
+    showRemaining: false,
   }),
   methods: {
     lpad(s, l, w) {
@@ -68,9 +72,6 @@ export default {
     lpad20(s) {
       return this.lpad(s, 2, 0);
     },
-    toggleRemaining() {
-      this.showRemaining = !this.showRemaining;
-    },
     next() {
       this.$socket.emit("queue.next");
     },
@@ -80,35 +81,46 @@ export default {
     playpause() {
       this.$socket.emit("playpause");
     },
+    extractTime(t) {
+      return {
+        hrs: Math.floor(t / (60 * 60)),
+        min: Math.floor((t % (60 * 60)) / 60),
+        sec: Math.round(t % 60),
+      };
+    },
   },
   computed: {
     timeStr() {
-      const prefix = this.showRemaining ? "-" : "";
-
-      if (this.status == null) return `${prefix}0:00`;
-      let { time, duration } = this.status;
-
-      if (this.showRemaining) {
-        time = duration - time;
-      }
+      if (this.status == null) return `0:00`;
+      const { time, duration } = this.status;
 
       // Clamp time
-      time = Math.max(Math.min(time, duration), 0);
+      const elapsed = Math.max(Math.min(time, duration), 0);
 
-      const hrs = Math.floor(time / (60 * 60));
-      const min = Math.floor(time / 60);
-      const sec = Math.round(time % 60);
+      const { hrs, min, sec } = this.extractTime(elapsed);
 
       return duration >= 60 * 60
-        ? `${prefix}${hrs}:${this.lpad20(min)}:${this.lpad20(sec)}`
-        : `${prefix}${min}:${this.lpad20(sec)}`;
+        ? `${hrs}:${this.lpad20(min)}:${this.lpad20(sec)}`
+        : `${min}:${this.lpad20(sec)}`;
+    },
+    remainingStr() {
+      if (this.status == null) return `-0:00`;
+      const { time, duration } = this.status;
+
+      // Clamp remaining
+      const remaining = Math.max(Math.min(duration - time, duration), 0);
+
+      const { hrs, min, sec } = this.extractTime(remaining);
+
+      return duration >= 60 * 60
+        ? `-${hrs}:${this.lpad20(min)}:${this.lpad20(sec)}`
+        : `-${min}:${this.lpad20(sec)}`;
     },
     durationStr() {
-      if (this.status == null) return "0:00";
+      if (this.status == null) return `0:00`;
       const { duration } = this.status;
-      const hrs = Math.floor(duration / (60 * 60));
-      const min = Math.floor(duration / 60);
-      const sec = Math.round(duration % 60);
+
+      const { hrs, min, sec } = this.extractTime(duration);
 
       return hrs > 0
         ? `${hrs}:${this.lpad20(min)}:${this.lpad20(sec)}`
@@ -144,115 +156,106 @@ export default {
   bottom: 0;
   left: 0;
   width: 100vw;
-  height: 4rem;
   text-align: center;
 
-  background-color: #400;
-  color: #fff;
+  overflow: hidden;
 
-  padding: 1rem;
+  background-color: var(--background-tertiary);
+  color: var(--text-primary);
 
-  .track {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
+  padding: 0.5rem;
 
-    // width: 15vw;
+  display: grid;
+  grid-template-columns: 6rem 7rem auto min-content;
+  grid-template-rows: 3rem 2.5rem 0.5rem;
+  grid-template-areas:
+    "art info info info"
+    "art controls space time"
+    "art progress progress progress";
 
-    background-color: #600;
+  .album {
+    grid-area: art;
 
+    img {
+      height: 100%;
+      width: 100%;
+      object-fit: contain;
+    }
+  }
+
+  .info {
+    grid-area: info;
     text-align: left;
 
-    .album {
-      position: relative;
-      left: 0;
-      height: 4rem;
-      width: 4rem;
-      display: inline-block;
+    padding: 0 0.5rem;
 
-      img {
-        height: 100%;
-        width: 100%;
-        object-fit: contain;
-      }
+    position: relative;
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: auto;
+    grid-template-rows: auto auto;
+    grid-template-areas: "title" "artist";
+
+    .title,
+    .artist {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
 
-    .info {
-      display: inline-block;
-      position: relative;
-      vertical-align: top;
-      height: 100%;
-
-      padding: 0 0.5rem;
-
-      .info-grid {
-        height: 100%;
-
-        display: grid;
-        grid-template-columns: auto;
-        grid-template-rows: 50% 50%;
-        grid-template-areas: "title" "artist";
-        align-items: center;
-
-        .title {
-          grid-area: title;
-          white-space: nowrap;
-        }
-
-        .artist {
-          grid-area: artist;
-          white-space: nowrap;
-        }
-      }
+    .title {
+      grid-area: title;
+      font-size: 1.2rem;
+    }
+    .artist {
+      min-width: 0;
+      grid-area: artist;
     }
   }
 
   .controls {
-    span {
-      cursor: pointer;
-      margin: 0 2rem;
+    grid-area: controls;
+    align-self: center;
+    white-space: nowrap;
+
+    padding: 0 0.5rem;
+
+    .loading {
+      font-size: 1.1rem;
+      vertical-align: middle;
+    }
+
+    button {
+      font-size: 1.2rem;
+      padding: 0.2rem 0.4rem;
     }
   }
 
-  .progress {
+  .time {
+    grid-area: time;
+    align-self: end;
+
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+
+  .progress-bar {
+    grid-area: progress;
+    align-self: center;
+
+    margin-left: 1rem;
+
     position: relative;
+    height: 0.35rem;
+    background-color: var(--background-secondary);
 
-    display: grid;
-    grid-template-columns: auto 50vw auto;
-    grid-template-rows: auto;
-    grid-template-areas: "elapsed pgbar duration";
-    column-gap: 1rem;
+    .progress-inner {
+      position: absolute;
+      left: 0;
+      height: 100%;
 
-    line-height: 1rem;
-
-    .time-elapsed {
-      grid-area: elapsed;
-      text-align: right;
-    }
-
-    .time-duration {
-      grid-area: duration;
-      text-align: left;
-    }
-
-    .progress-bar {
-      grid-area: pgbar;
-      align-self: center;
-
-      position: relative;
-      display: inline-block;
-      width: 100%;
-      height: 0.25rem;
-      background-color: #080;
-
-      .progress-inner {
-        position: absolute;
-        left: 0;
-        top: 0;
-        height: 100%;
-        background-color: #008;
-      }
+      background-color: var(--theme-color);
     }
   }
 }

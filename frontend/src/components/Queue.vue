@@ -1,22 +1,24 @@
 <template>
   <div class="queue">
-    <span class="queue-empty" v-if="queue.length == 0">Queue is empty</span>
+    <span class="queue-empty" v-if="upcoming.length == 0">Queue is empty</span>
     <ol v-else>
-      <li v-for="(track, i) in queue" :key="track.source + track.id">
+      <li v-for="(track, i) in upcoming" :key="track.source + track.id">
+        <div v-if="i == 0" class="now-playing-label">Now Playing</div>
+
         <div class="actions-wrap">
-          <div class="actions">
+          <div v-if="i > 0" class="actions">
             <button
               class="shift-up"
-              @click="shift(i, i - 1)"
-              :disabled="i == 0"
+              @click="shift(i - 1, i - 2)"
+              :disabled="i <= 1"
             >
               <span class="fas fa-chevron-up"></span>
             </button>
-            <span class="index">{{ i + 1 }}</span>
+            <span class="index">{{ i }}</span>
             <button
               class="shift-down"
-              @click="shift(i, i + 1)"
-              :disabled="i == queue.length - 1"
+              @click="shift(i - 1, i)"
+              :disabled="i == upcoming.length - 1"
             >
               <span class="fas fa-chevron-down"></span>
             </button>
@@ -34,6 +36,8 @@
             <button class="remove" @click="remove(i)">Remove from queue</button>
           </div>
         </div>
+
+        <div v-if="i == 0" class="upcoming-label">Upcoming</div>
       </li>
     </ol>
   </div>
@@ -42,17 +46,25 @@
 <script>
 export default {
   sockets: {
+    track(t) {
+      this.current = t;
+    },
     queue(q) {
       this.queue = q;
     },
   },
-  data: () => ({ queue: [] }),
+  data: () => ({ current: null, queue: [] }),
   methods: {
     shift(from, to) {
       this.$socket.emit("queue.shift", from, to);
     },
     remove(at) {
       this.$socket.emit("queue.remove", at);
+    },
+  },
+  computed: {
+    upcoming() {
+      return this.current ? [this.current, ...this.queue] : [];
     },
   },
 };
@@ -77,6 +89,22 @@ export default {
 
     li {
       padding: 0.2rem 0;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      .now-playing-label,
+      .upcoming-label {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+
+        border-bottom: 1px solid var(--background-secondary);
+      }
+
+      .upcoming-label {
+        margin-top: 0.5rem;
+      }
 
       .actions-wrap {
         display: inline-block;
@@ -152,7 +180,7 @@ export default {
             grid-area: remove;
             text-align: left;
             font-size: 0.75rem;
-            color: #555;
+            color: var(--text-secondary);
 
             margin: 0;
             padding: 0;

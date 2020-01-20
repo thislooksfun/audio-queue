@@ -10,7 +10,7 @@
       <h2 class="braid-name">Braid</h2>
     </div>
 
-    <div class="center">
+    <div class="search-container">
       <div class="search-box">
         <form @submit.prevent>
           <input
@@ -21,10 +21,13 @@
           />
           <span class="search-icon fas fa-search"></span>
         </form>
+
+        <search-results
+          v-show="focused && results.length > 0"
+          :results="results"
+        />
       </div>
     </div>
-
-    <search-results v-show="focused && results.length > 0" :results="results" />
   </div>
 </template>
 
@@ -53,14 +56,8 @@ export default {
     },
     searchResults(r, i) {
       if (i < this.lastSearchIndex) return;
-      this.results = [
-        ...r,
-        {
-          service: { name: "other", displayName: "Other" },
-          tracks: [{ name: "foo", artist: "bar" }],
-        },
-      ];
-      // this.results = r;
+
+      this.results = r;
       this.lastSearchIndex = i;
     },
     onkey(e) {
@@ -96,14 +93,14 @@ export default {
   width: 100vw;
   top: 0;
   left: 0;
-  background-color: #712f79;
-  color: #fff;
+  background-color: var(--background-tertiary);
+  color: var(--text-primary);
 
   z-index: 99;
 
   .logo {
     position: absolute;
-    left: 1.5rem;
+    left: 0;
     top: 0;
 
     height: 4rem;
@@ -116,7 +113,7 @@ export default {
 
       .braid-square,
       .braid-loop {
-        stroke: #fff;
+        stroke: var(--theme-color);
       }
     }
 
@@ -126,42 +123,78 @@ export default {
       top: 0;
       line-height: 4.25rem;
       margin: 0;
+      color: var(--theme-color);
+
+      @media (max-width: 20rem) {
+        & {
+          display: none;
+        }
+      }
     }
   }
 
-  .search-box {
-    display: inline-block;
+  .search-container {
+    @offset: 8.5rem;
+    @max-width: 35rem;
+
     position: relative;
-    height: 4rem;
-    line-height: 4rem;
+    left: @offset;
+    width: calc(100% - (@offset * 2));
+    padding: 0 1rem 0 0;
+    text-align: center;
 
-    input[type="text"] {
-      border: 0;
-      border-bottom: 1px solid #ccc;
-      border-radius: 0;
-      background-color: #0000;
-      color: #fff;
-      font-size: 1.5rem;
-
-      width: 30vw;
-
-      padding: 0.25em 1.5em 0.25em 0.25em;
-
-      &::placeholder {
-        color: #ccc;
-      }
-
-      &:focus {
-        outline: none;
-        border-bottom-color: #fff;
+    @media (max-width: (@max-width + @offset*2 + 2rem)) {
+      & {
+        width: calc(100% - @offset);
+        text-align: left;
       }
     }
 
-    .search-icon {
-      position: absolute;
-      font-size: 1.25rem;
-      right: 0.75rem;
+    @media (max-width: 20rem) {
+      & {
+        left: 4rem;
+        width: calc(100% - 4rem);
+        text-align: left;
+      }
+    }
+
+    .search-box {
+      display: inline-block;
+      position: relative;
+      height: 4rem;
       line-height: 4rem;
+
+      width: 100%;
+      max-width: @max-width;
+
+      input[type="text"] {
+        border: 0;
+        border-bottom: 1px solid var(--text-secondary);
+        border-radius: 0;
+        background: none;
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        width: 100%;
+
+        padding: 0.25em 1.5em 0.25em 0.25em;
+
+        &::placeholder {
+          color: var(--text-secondary);
+        }
+
+        &:focus {
+          outline: none;
+          border-bottom-color: var(--theme-color);
+        }
+      }
+
+      .search-icon {
+        position: absolute;
+        font-size: 1.25rem;
+        right: 0.75rem;
+        line-height: 4rem;
+        color: var(--text-secondary);
+      }
     }
   }
 }

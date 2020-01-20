@@ -119,7 +119,8 @@ button {
 .queue-hist-container {
   position: relative;
   height: 100%;
-  width: 50vw;
+  width: 100%;
+  max-width: 55rem;
   margin: 0 auto;
   padding: 4rem 0;
 
