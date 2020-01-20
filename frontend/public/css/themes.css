@@ -1,0 +1,23 @@
+body {
+  --text-primary: #000;
+  --text-secondary: #555;
+
+  --background-primary: #fff;
+  --background-secondary: #ddd;
+  --background-tertiary: #eee;
+
+  --theme-color: #aa46b6;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    --text-primary: #fff;
+    --text-secondary: #aaa;
+
+    --background-primary: #000;
+    --background-secondary: #333;
+    --background-tertiary: #222;
+
+    --theme-color: #aa46b6;
+  }
+}

@@ -65,6 +65,8 @@ body {
   width: 100%;
   height: 100%;
   margin: 0;
+
+  background-color: var(--background-secondary);
 }
 
 #app {
@@ -77,9 +79,7 @@ body {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #000;
-
-  --theme-color: #712f79;
+  color: var(--text-primary);
 }
 
 .center {
@@ -99,8 +99,11 @@ button {
 
   cursor: pointer;
 
+  color: var(--text-primary);
+
   &:disabled {
     cursor: not-allowed;
+    color: var(--text-secondary);
   }
 
   &:not(:disabled) {
@@ -127,8 +130,7 @@ button {
 
     padding: 0.5rem;
 
-    border-left: 1px solid #000;
-    border-right: 1px solid #000;
+    background-color: var(--background-primary);
 
     .queue-hist-switch {
       width: 100%;
@@ -139,16 +141,16 @@ button {
       a {
         text-decoration: none;
         margin: 0 1rem;
-        color: #555;
+        color: var(--text-secondary);
 
         font-size: 1.25rem;
 
         &:hover {
-          color: #333;
+          color: var(--text-primary);
         }
 
         &.selected {
-          color: #000;
+          color: var(--text-primary);
           border-bottom: 1px solid var(--theme-color);
         }
       }

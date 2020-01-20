@@ -42,9 +42,9 @@ export default {
   top: 4rem;
   left: calc((100vw - @width) / 2);
   width: @width;
-  background-color: #fff;
-  color: #000;
-  border: 1px solid #000;
+  background-color: var(--background-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--background-secondary);
   border-top: 0;
   border-radius: 0 0 5px 5px;
 
@@ -79,6 +79,10 @@ export default {
 
       &.result {
         cursor: pointer;
+
+        &:hover {
+          background-color: var(--background-secondary);
+        }
 
         .album {
           position: relative;

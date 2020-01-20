@@ -108,7 +108,7 @@ export default {
             grid-area: readd;
             text-align: left;
             font-size: 0.75rem;
-            color: #555;
+            color: var(--text-secondary);
 
             margin: 0;
             padding: 0;
