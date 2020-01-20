@@ -7,7 +7,7 @@
 
         <li
           v-for="t in tracks"
-          :key="service.name + t.name"
+          :key="service.name + t.id"
           class="result"
           @click="enqueue(t)"
         >

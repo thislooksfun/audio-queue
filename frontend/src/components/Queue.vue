@@ -2,10 +2,7 @@
   <div class="queue">
     <span class="queue-empty" v-if="queue.length == 0">Queue is empty</span>
     <ol v-else>
-      <li
-        v-for="(track, i) in queue"
-        :key="track.source + track.artist + track.name"
-      >
+      <li v-for="(track, i) in queue" :key="track.source + track.id">
         <div class="actions-wrap">
           <div class="actions">
             <button

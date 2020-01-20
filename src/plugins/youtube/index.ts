@@ -248,6 +248,7 @@ const plugin: Plugin = {
     return Promise.resolve([
       {
         source: "youtube",
+        id,
         name: `hello -- ${id}`,
         artist: "world",
         artwork: null,

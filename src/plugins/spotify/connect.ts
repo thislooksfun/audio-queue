@@ -212,6 +212,7 @@ export default {
       .then(tracks => tracks.items)
       .map(track => ({
         source: "spotify",
+        id: track.id,
         name: track.name,
         artist: track.artists.map(a => a.name).join(" & "),
         artwork: getAlbumArt(track.album),

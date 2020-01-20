@@ -2,10 +2,7 @@
   <div class="history">
     <span class="hist-empty" v-if="history.length == 0">History is empty</span>
     <ol v-else>
-      <li
-        v-for="(track, i) in history"
-        :key="track.source + track.artist + track.name"
-      >
+      <li v-for="(track, i) in history" :key="track.source + track.id">
         <span class="index">{{ i + 1 }}</span>
 
         <div class="album">

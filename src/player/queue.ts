@@ -15,6 +15,7 @@ export interface AudioStatus {
 
 export interface AudioTrack {
   source: string;
+  id: string;
   name: string;
   artist: string;
   artwork: string | null;
