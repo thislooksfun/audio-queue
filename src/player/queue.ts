@@ -85,10 +85,12 @@ function start() {
 
   log.info("Starting audio source...");
 
-  server.broadcast("loading");
-
   updateLock++;
   let np = nowPlaying!;
+
+  server.broadcast("track", np.track);
+  server.broadcast("loading");
+
   return np
     .start()
     .tap(() => log.info("Audio source started successfully"))
