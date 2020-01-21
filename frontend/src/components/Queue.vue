@@ -33,7 +33,9 @@
           <div class="track">
             <span class="name">{{ track.name }}</span>
             <span class="artist">{{ track.artist }}</span>
-            <button class="remove" @click="remove(i)">Remove from queue</button>
+            <button v-if="i > 0" class="remove" @click="remove(i - 1)">
+              Remove from queue
+            </button>
           </div>
         </div>
 
