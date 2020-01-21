@@ -94,6 +94,7 @@ button {
   background: none;
   border: none;
   border-radius: 0;
+  padding: 0;
 
   font-size: 1rem;
 
@@ -122,7 +123,7 @@ button {
   width: 100%;
   max-width: 55rem;
   margin: 0 auto;
-  padding: 4rem 0;
+  padding: 4rem 0 6.5rem 0;
 
   .queue-hist {
     position: relative;
