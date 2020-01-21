@@ -3,11 +3,13 @@
     :class="{
       center: true,
       'connection-status': true,
+      connecting: connecting,
       connected: connected,
       hidden: hide,
     }"
   >
-    <span v-if="connected">Connected!</span>
+    <span v-if="connecting">Connecting...</span>
+    <span v-else-if="connected">Connected!</span>
     <span v-else>Disconnected</span>
 
     <div class="overlay"></div>
@@ -19,15 +21,22 @@ export default {
   sockets: {
     connect() {
       this.connected = true;
+      this.connecting = false;
       this.hideto = setTimeout(() => (this.hide = true), 1 * 1000);
     },
     disconnect() {
       this.connected = false;
+      this.connecting = false;
       this.hide = false;
       clearTimeout(this.hideto);
     },
   },
-  data: () => ({ connected: false, hide: false, hideto: null }),
+  data: () => ({
+    connecting: true,
+    connected: false,
+    hide: false,
+    hideto: null,
+  }),
 };
 </script>
 
@@ -61,6 +70,10 @@ export default {
     transition-property: backdrop-filter, background-color;
     transition-duration: 0.5s;
     transition-timing-function: ease-in-out;
+  }
+
+  &.connecting {
+    background-color: lighten(#fb6340, 15%);
   }
 
   &.connected {
